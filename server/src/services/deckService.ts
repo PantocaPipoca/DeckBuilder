@@ -1,64 +1,165 @@
-import prisma from './prisma';
+// src/services/deckService.ts
+import prisma from '../configs/database';
+import { CreateDeckDTO, UpdateDeckDTO, DeckQueryParams } from '../types/deck.types';
+import { DECK_CONFIG } from '../configs/constants';
 
-export const listDecks = async (onlyPublic?: boolean) => {
-  const where = onlyPublic ? { isPublic: true } : {};
-  return prisma.deck.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-  });
-};
+export class DeckService {
+  /**
+   * Lista decks com filtros opcionais
+   */
+  static async listDecks(params: DeckQueryParams = {}) {
+    const { onlyPublic, ownerId, limit = 50, offset = 0 } = params;
 
-export const getDeckById = async (id: number) => {
-  return prisma.deck.findUnique({ where: { id } });
-};
+    const where: any = {};
+    if (onlyPublic) where.isPublic = true;
+    if (ownerId) where.ownerId = ownerId;
 
-export const createDeck = async (data: {
-  name: string;
-  description?: string;
-  cards: string[];
-  isPublic?: boolean;
-  ownerId?: number | null;
-}) => {
-  // Prisma expects `cards` as Json; pass directly (array)
-  return prisma.deck.create({
-    data: {
-      name: data.name,
-      description: data.description ?? '',
-      cards: data.cards as unknown, // prisma Json accepts unknown
-      isPublic: data.isPublic ?? false,
-      likes: 0,
-      ownerId: data.ownerId ?? null,
-    },
-  });
-};
+    return prisma.deck.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+  }
 
-export const updateDeck = async (id: number, data: {
-  name?: string;
-  description?: string;
-  cards?: string[];
-  isPublic?: boolean;
-}) => {
-  const updateData: any = {};
-  if (data.name !== undefined) updateData.name = data.name;
-  if (data.description !== undefined) updateData.description = data.description;
-  if (data.cards !== undefined) updateData.cards = data.cards as unknown;
-  if (typeof data.isPublic === 'boolean') updateData.isPublic = data.isPublic;
+  /**
+   * Obtém deck por ID
+   */
+  static async getDeckById(id: number) {
+    const deck = await prisma.deck.findUnique({
+      where: { id },
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
 
-  return prisma.deck.update({
-    where: { id },
-    data: updateData,
-  });
-};
+    if (!deck) {
+      const error: any = new Error('Deck não encontrado');
+      error.statusCode = 404;
+      throw error;
+    }
 
-export const deleteDeck = async (id: number) => {
-  return prisma.deck.delete({ where: { id } });
-};
+    return deck;
+  }
 
-export const likeDeck = async (id: number) => {
-  // increment atomicamente
-  const deck = await prisma.deck.update({
-    where: { id },
-    data: { likes: { increment: 1 } as any },
-  });
-  return deck.likes;
-};
+  /**
+   * Cria novo deck
+   */
+  static async createDeck(data: CreateDeckDTO) {
+    // Validação
+    if (!data.cards || data.cards.length !== DECK_CONFIG.CARDS_PER_DECK) {
+      const error: any = new Error(
+        `Deck deve ter exatamente ${DECK_CONFIG.CARDS_PER_DECK} cartas`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (data.name.length > DECK_CONFIG.MAX_NAME_LENGTH) {
+      const error: any = new Error('Nome do deck muito longo');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return prisma.deck.create({
+      data: {
+        name: data.name,
+        description: data.description || '',
+        cards: data.cards as any,
+        isPublic: data.isPublic ?? false,
+        likes: 0,
+        ownerId: data.ownerId ?? null,
+      },
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+  }
+
+  /**
+   * Atualiza deck existente
+   */
+  static async updateDeck(id: number, data: UpdateDeckDTO) {
+    // Verifica se existe
+    await this.getDeckById(id);
+
+    // Validação de cards
+    if (data.cards && data.cards.length !== DECK_CONFIG.CARDS_PER_DECK) {
+      const error: any = new Error(
+        `Deck deve ter exatamente ${DECK_CONFIG.CARDS_PER_DECK} cartas`
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.cards !== undefined) updateData.cards = data.cards;
+    if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+
+    return prisma.deck.update({
+      where: { id },
+      data: updateData,
+      include: {
+        owner: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+  }
+
+  /**
+   * Remove deck
+   */
+  static async deleteDeck(id: number) {
+    // Verifica se existe
+    await this.getDeckById(id);
+
+    return prisma.deck.delete({
+      where: { id },
+    });
+  }
+
+  /**
+   * Adiciona like ao deck
+   */
+  static async likeDeck(id: number) {
+    // Verifica se existe
+    await this.getDeckById(id);
+
+    const deck = await prisma.deck.update({
+      where: { id },
+      data: { likes: { increment: 1 } },
+    });
+
+    return deck.likes;
+  }
+
+  /**
+   * Obtém estatísticas de decks
+   */
+  static async getStats() {
+    const [total, public_count, total_likes] = await Promise.all([
+      prisma.deck.count(),
+      prisma.deck.count({ where: { isPublic: true } }),
+      prisma.deck.aggregate({ _sum: { likes: true } }),
+    ]);
+
+    return {
+      total,
+      public: public_count,
+      private: total - public_count,
+      totalLikes: total_likes._sum.likes || 0,
+    };
+  }
+}
