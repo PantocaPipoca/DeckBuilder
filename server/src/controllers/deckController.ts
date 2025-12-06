@@ -1,10 +1,21 @@
 import { Request, Response } from 'express';
 import { DeckService } from '../services/deckService';
 import { asyncHandler } from '../utils/asyncHandler';
+import { HTTP_STATUS } from '../configs/constants';
 
+/**
+ * Essencially this is a class that provides static methods to manage decks.
+ * Made to use in REST API routes.
+ */
 export class DeckController {
   /**
-   * GET /api/decks
+   * Lists all decks with optional filtering
+   * 
+   * @route GET /api/decks
+   * @query onlyPublic: filter for public decks only
+   * @query ownerId: filter by owner ID
+   * @query limit: maximum results to return
+   * @query offset: number of results to skip
    */
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
     const onlyPublic = req.query.onlyPublic === 'true';
@@ -27,7 +38,10 @@ export class DeckController {
   });
 
   /**
-   * GET /api/decks/:id
+   * Gets a single deck by ID
+   * 
+   * @route GET /api/decks/:id
+   * @param id: deck ID
    */
   static getDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -40,19 +54,26 @@ export class DeckController {
   });
 
   /**
-   * POST /api/decks
+   * Creates a new deck
+   * 
+   * @route POST /api/decks
+   * @body CreateDeckDTO: deck data
    */
   static createDeck = asyncHandler(async (req: Request, res: Response) => {
     const deck = await DeckService.createDeck(req.body);
 
-    res.status(201).json({
+    res.status(HTTP_STATUS.CREATED).json({
       status: 'success',
       data: deck,
     });
   });
 
   /**
-   * PUT /api/decks/:id
+   * Updates an existing deck
+   * 
+   * @route PUT /api/decks/:id
+   * @param id: deck ID to update
+   * @body UpdateDeckDTO: fields to update
    */
   static updateDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -65,17 +86,23 @@ export class DeckController {
   });
 
   /**
-   * DELETE /api/decks/:id
+   * Deletes a deck
+   * 
+   * @route DELETE /api/decks/:id
+   * @param id: deck ID to delete
    */
   static deleteDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     await DeckService.deleteDeck(id);
 
-    res.status(204).send();
+    res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 
   /**
-   * POST /api/decks/:id/like
+   * Increments like count for a deck
+   * 
+   * @route POST /api/decks/:id/like
+   * @param id: deck ID to like
    */
   static likeDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
@@ -88,7 +115,10 @@ export class DeckController {
   });
 
   /**
-   * GET /api/decks/stats
+   * Gets deck statistics
+   * 
+   * @route GET /api/decks/stats
+   * @returns total, public, private counts and total likes
    */
   static getStats = asyncHandler(async (req: Request, res: Response) => {
     const stats = await DeckService.getStats();

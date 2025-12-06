@@ -2,10 +2,25 @@
 import prisma from '../configs/database';
 import { CreateDeckDTO, UpdateDeckDTO, DeckQueryParams } from '../types/deck.types';
 import { DECK_CONFIG } from '../configs/constants';
+import { HTTP_STATUS } from '../configs/constants';
+
+
+/**
+ * Essencially this is a class that provides static methods to manage decks IN THE DATABASE.
+ * Used by the DeckController.
+ */
 
 export class DeckService {
+
   /**
-   * Lista decks com filtros opcionais
+   * Lists decks with optional filtering
+   * 
+   * @param params: query parameters for filtering and pagination
+   * @param params.onlyPublic: return only public decks
+   * @param params.ownerId: filter by owner ID
+   * @param params.limit: maximum results (default: 50)
+   * @param params.offset: skip n results (default: 0)
+   * @returns array of decks with owner information
    */
   static async listDecks(params: DeckQueryParams = {}) {
     const { onlyPublic, ownerId, limit = 50, offset = 0 } = params;
@@ -28,7 +43,11 @@ export class DeckService {
   }
 
   /**
-   * Obtém deck por ID
+   * Gets a single deck by ID
+   * 
+   * @param id: deck ID
+   * @returns deck with owner information
+   * @throws error with statusCode 404 if deck not found
    */
   static async getDeckById(id: number) {
     const deck = await prisma.deck.findUnique({
@@ -42,7 +61,7 @@ export class DeckService {
 
     if (!deck) {
       const error: any = new Error('Deck não encontrado');
-      error.statusCode = 404;
+      error.statusCode = HTTP_STATUS.NOT_FOUND;
       throw error;
     }
 
@@ -50,21 +69,25 @@ export class DeckService {
   }
 
   /**
-   * Cria novo deck
+   * Creates a new deck
+   * 
+   * @param data: deck creation data
+   * @returns created deck with owner information
+   * @throws error with statusCode 400 if validation fails
    */
   static async createDeck(data: CreateDeckDTO) {
-    // Validação
+    // Validation
     if (!data.cards || data.cards.length !== DECK_CONFIG.CARDS_PER_DECK) {
       const error: any = new Error(
         `Deck deve ter exatamente ${DECK_CONFIG.CARDS_PER_DECK} cartas`
       );
-      error.statusCode = 400;
+      error.statusCode = HTTP_STATUS.BAD_REQUEST;
       throw error;
     }
 
     if (data.name.length > DECK_CONFIG.MAX_NAME_LENGTH) {
       const error: any = new Error('Nome do deck muito longo');
-      error.statusCode = 400;
+      error.statusCode = HTTP_STATUS.BAD_REQUEST;
       throw error;
     }
 
@@ -86,7 +109,14 @@ export class DeckService {
   }
 
   /**
-   * Atualiza deck existente
+   * Updates an existing deck
+   * Only provided fields will be updated.
+   * 
+   * @param id: deck ID to update
+   * @param data: fields to update
+   * @returns updated deck with owner information
+   * @throws error 404 if deck not found
+   * @throws error 400 if validation fails
    */
   static async updateDeck(id: number, data: UpdateDeckDTO) {
     // Verifica se existe
@@ -97,7 +127,7 @@ export class DeckService {
       const error: any = new Error(
         `Deck deve ter exatamente ${DECK_CONFIG.CARDS_PER_DECK} cartas`
       );
-      error.statusCode = 400;
+      error.statusCode = HTTP_STATUS.BAD_REQUEST;
       throw error;
     }
 
@@ -119,7 +149,11 @@ export class DeckService {
   }
 
   /**
-   * Remove deck
+   * Deletes a deck
+   * 
+   * @param id: deck ID to delete
+   * @returns deleted deck data
+   * @throws error 404 if deck not found
    */
   static async deleteDeck(id: number) {
     // Verifica se existe
@@ -131,7 +165,11 @@ export class DeckService {
   }
 
   /**
-   * Adiciona like ao deck
+   * Increments the like count for a deck
+   * 
+   * @param id: deck ID to like
+   * @returns updated like count
+   * @throws error 404 if deck not found
    */
   static async likeDeck(id: number) {
     // Verifica se existe
@@ -146,7 +184,9 @@ export class DeckService {
   }
 
   /**
-   * Obtém estatísticas de decks
+   * Gets all decks statistics
+   * 
+   * @returns Statistics object with total, public, private decks and total likes
    */
   static async getStats() {
     const [total, public_count, total_likes] = await Promise.all([

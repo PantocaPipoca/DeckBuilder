@@ -2,6 +2,9 @@
 import { Router } from 'express';
 import { DeckController } from '../controllers/deckController';
 
+/**
+ * Defines all routes related to deck operations
+ */
 const router = Router();
 
 router.get('/stats', DeckController.getStats);
