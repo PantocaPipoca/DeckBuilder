@@ -1,0 +1,36 @@
+### Create a deck
+POST http://localhost:4000/api/decks
+Content-Type: application/json
+
+{
+  "name": "My Awesome Deck",
+  "description": "Test deck",
+  "cards": ["Card1", "Card2", "Card3", "Card4", "Card5", "Card6", "Card7", "Card8"],
+  "isPublic": true
+}
+
+### Get all decks
+GET http://localhost:4000/api/decks
+
+### Get deck by ID
+GET http://localhost:4000/api/decks/1
+
+### Update deck
+PUT http://localhost:4000/api/decks/1
+Content-Type: application/json
+
+{
+  "name": "Updated Deck Name"
+}
+
+### Delete deck
+DELETE http://localhost:4000/api/decks/1
+
+### Like a deck
+POST http://localhost:4000/api/decks/1/like
+
+### Get stats
+GET http://localhost:4000/api/decks/stats
+
+### Health check
+GET http://localhost:4000/health

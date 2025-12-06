@@ -20,6 +20,21 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 /**
+ * Root endpoint providing basic API information
+ */
+app.get('/', (req, res) => {
+  res.json({
+    message: 'DeckBuilder API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      api: '/api/decks'
+    }
+  });
+});
+
+
+/**
  * Health check endpoint to verify server is running
  * 
  * @returns Server status with timestamp and uptime
@@ -37,7 +52,7 @@ console.log('Routes loaded:', typeof routes, routes);
 app.use('/api', routes);
 
 // Error handling
-app.use(notFound);
+app.use(notFound); // Quando n encontra rota tipo /apiasdadsdas
 app.use(errorHandler);
 
 export default app;

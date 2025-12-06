@@ -1,37 +1,69 @@
-// src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../utils/errors';
 import { HTTP_STATUS } from '../configs/constants';
 
-/**
- * Error handling middleware
- * This middleware forces all express routes that are supposed to return errors
- * pass through here first.
- * This way we can have more control and debugging information if we need.
- * @param err express error object
- * @param req express request object
- * @param res express response object
- * @param next express next function (unused here)
- * @returns 
- */
 export const errorHandler = (
-  err: Error | AppError,
+  err: any,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  if (err instanceof AppError) {
+
+  // AppError (duck typing - verifica propriedades)
+  if (err.statusCode && err.message) {
     return res.status(err.statusCode).json({
       status: 'error',
       message: err.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });
   }
 
-  // Log erro não esperado
-  console.error('err:', err);
+  // Erros do Prisma
+  if (err.code) {
+    switch (err.code) {
+      case 'P2002':
+        return res.status(HTTP_STATUS.CONFLICT).json({
+          status: 'error',
+          message: 'Já existe um registo com esses dados únicos',
+          field: err.meta?.target,
+        });
 
+      case 'P2025':
+        return res.status(HTTP_STATUS.NOT_FOUND).json({
+          status: 'error',
+          message: 'Registo não encontrado',
+        });
+
+      case 'P2003':
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          status: 'error',
+          message: 'Violação de chave estrangeira',
+        });
+
+      default:
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          status: 'error',
+          message: 'Erro na operação da base de dados',
+          ...(process.env.NODE_ENV === 'development' && { code: err.code }),
+        });
+    }
+  }
+
+  // Erros de validação (Express)
+  if (err.name === 'ValidationError') {
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      status: 'error',
+      message: 'Erro de validação',
+      errors: err.errors,
+    });
+  }
+
+  // Erro genérico (500)
   return res.status(HTTP_STATUS.INTERNAL_ERROR).json({
     status: 'error',
-    message: 'Algo correu mal no servidor',
+    message:
+      process.env.NODE_ENV === 'development'
+        ? err.message
+        : 'Algo correu mal no servidor',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };

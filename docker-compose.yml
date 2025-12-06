@@ -2,14 +2,44 @@ services:
   db:
     image: postgres:15
     container_name: CRDB
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: devpass
-      POSTGRES_DB: daw
+      POSTGRES_USER: ${DB_USER:-dev}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devpass}
+      POSTGRES_DB: ${DB_NAME:-DeckBuilder}
     ports:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    container_name: CRDev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-4000}:4000"
+    
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-4000}
+      DATABASE_URL: postgresql://${DB_USER:-dev}:${DB_PASSWORD:-devpass}@db:5432/${DB_NAME:-DeckBuilder}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-qPreguicaMeu}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server/src:/app/src:z
+      - ./server/prisma:/app/prisma:z
+
+      - /app/node_modules
+    command: npm run dev
 
 volumes:
   db-data:
