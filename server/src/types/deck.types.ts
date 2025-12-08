@@ -5,32 +5,32 @@
  * Data required to create a new deck
  * 
  * @property name: deck name
- * @property description: deck description (Optional)
- * @property cards: array of 8 card identifiers
- * @property isPublic: is the deck publicly visible (Optional) (default: false)
- * @property ownerId: deck owner`s id (Optional)
+ * @property description: deck description
+ * @property cardNames: array of 8 card names
+ * @property isPublic: is the deck publicly visible
+ * @property ownerId: deck owner's id
  */
 export interface CreateDeckDTO {
   name: string;
-  description?: string;
-  cards: string[];
-  isPublic?: boolean;
-  ownerId?: number;
+  description: string;
+  cardNames: string[];
+  isPublic: boolean;
+  ownerId: number;
 }
 
 /**
  * Data you can update in an existing deck
  * All fields are optional: only provided fields will be updated
  * 
- * @property name: new deck name
- * @property description: new deck description
- * @property cards: new array of 8 card identifiers
- * @property isPublic: new visibility setting
+ * @property name: deck name
+ * @property description: deck description
+ * @property cardNames: array of 8 card names
+ * @property isPublic: is the deck publicly visible
  */
 export interface UpdateDeckDTO {
   name?: string;
   description?: string;
-  cards?: string[];
+  cardNames?: string[];
   isPublic?: boolean;
 }
 

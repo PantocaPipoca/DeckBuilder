@@ -1,13 +1,14 @@
 // src/routes/index.ts
 import { Router } from 'express';
 import deckRoutes from './deckRoutes';
+import cardRoutes from './cardRoutes';
 
 const router = Router();
 
-/**
- * Deck routes
- * Mounts all deck-related endpoints under /api/decks
- */
+// Card routes
+router.use('/cards', cardRoutes);
+
+// Deck routes
 router.use('/decks', deckRoutes);
 
 export default router;

@@ -1,3 +1,4 @@
+// prisma/schema.prisma
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -17,21 +18,67 @@ model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  name      String?
+  name      String
   decks     Deck[]   @relation("UserDecks")
   createdAt DateTime @default(now())
 }
 
+model Card {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  elixir      Int
+  rarity      Rarity
+  type        CardType
+  description String
+  iconUrl     String
+  deckCards   DeckCard[]
+  createdAt   DateTime   @default(now())
+
+  @@index([rarity])
+  @@index([type])
+  @@index([elixir])
+}
+
 model Deck {
-  id          Int      @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   name        String
-  description String?
-  cards       Json
-  isPublic    Boolean  @default(false)
-  likes       Int      @default(0)
-  ownerId     Int?
-  owner       User?    @relation(fields: [ownerId], references: [id], name: "UserDecks")
-  slug        String?  @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description String
+  isPublic    Boolean    @default(false)
+  likes       Int        @default(0)
+  avgElixir   Float
+  ownerId     Int
+  owner       User      @relation(fields: [ownerId], references: [id], name: "UserDecks", onDelete: Cascade)
+  cards       DeckCard[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([isPublic])
+  @@index([likes])
+}
+
+model DeckCard {
+  id        Int      @id @default(autoincrement())
+  deckId    Int
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  cardId    Int
+  card      Card     @relation(fields: [cardId], references: [id])
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@unique([deckId, cardId])
+  @@unique([deckId, position])
+  @@index([deckId])
+}
+
+enum Rarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum CardType {
+  TROOP
+  SPELL
+  BUILDING
 }
