@@ -1,0 +1,52 @@
+// src/components/Card.tsx
+
+import styles from '../styles/Card.module.css';
+import type { CardProps, Rarity } from '../types';
+
+/**
+ * Componente simples: recebe dados da carta e função de click
+ */
+function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove }: CardProps) {
+  
+  // Cor do glow baseado na rarity
+  const rarityColors: Record<Rarity, string> = {
+    'LEGENDARY': '#FFD700',
+    'EPIC': '#A855F7',
+    'RARE': '#FF6B35',
+    'COMMON': '#94A3B8'
+  };
+  
+  const glowColor = rarityColors[card.rarity];
+  
+  return (
+    <div className={styles.cardWrapper}>
+      {/* A carta */}
+      <div 
+        className={`${styles.card} ${isSelected ? styles.selected : ''}`}
+        onClick={onClick}
+        style={{ '--glow-color': glowColor } as React.CSSProperties}
+      >
+        <img src={card.iconUrl} alt={card.name} className={styles.cardImage} />
+        <div className={styles.elixirBadge}>{card.elixir}</div>
+        <div className={styles.cardName}>{card.name}</div>
+      </div>
+      
+      {/* Botões aparecem quando showButtons = true */}
+      {showButtons && (
+        <div className={styles.buttonContainer}>
+          <button className={styles.infoButton} onClick={onInfo}>
+            INFO
+          </button>
+          <button 
+            className={onRemove ? styles.removeButton : styles.useButton}
+            onClick={onRemove || onUse}
+          >
+            {onRemove ? 'REMOVE' : 'USE'}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Card;

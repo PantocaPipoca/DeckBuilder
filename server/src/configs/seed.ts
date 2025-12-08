@@ -89,6 +89,7 @@ const cards = [
   { name: 'Barbarian Barrel', elixir: 2, rarity: 'EPIC', type: 'SPELL', description: 'A rolling barrel that deals damage. Spawns a Barbarian when destroyed!' },
   { name: 'Goblin Curse', elixir: 2, rarity: 'EPIC', type: 'SPELL', description: 'Turns enemy troops into Goblins for a few seconds!' },
   { name: 'Goblin Cage', elixir: 4, rarity: 'EPIC', type: 'BUILDING', description: 'Spawns a Goblin Brawler once destroyed. Doesn\'t target air units.' },
+  { name: 'Vines', elixir: 3, rarity: 'EPIC', type: 'SPELL', description: 'Sprouts vines on both sides of the Arena that pull troops, slow them down and make them retarget.' },
 
   // === LEGENDARY ===
   { name: 'Mega Knight', elixir: 7, rarity: 'LEGENDARY', type: 'TROOP', description: 'He jumps on his enemies, stunning them and dealing massive damage. He has armor of steel and a mustache of night!' },

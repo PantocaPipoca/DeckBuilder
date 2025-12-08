@@ -1,0 +1,137 @@
+/* src/styles/DecksPage.module.css */
+
+.page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0F1419 0%, #1A1D29 100%);
+  color: white;
+  padding: 20px;
+}
+
+/* ========== DECK SLOTS (5 tabs) ========== */
+
+.deckSlots {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+.deckSlot {
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deckSlot:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.deckSlot.active {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  border-color: #60A5FA;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* ========== DECK BUILDER (8 cartas) ========== */
+
+.deckBuilder {
+  margin-bottom: 40px;
+}
+
+.deckBuilder h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.deckGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 cartas por linha */
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.emptySlot {
+  width: 120px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emptySlot:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ========== REPLACE PROMPT ========== */
+
+.replacePrompt {
+  text-align: center;
+  padding: 30px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid #3B82F6;
+  border-radius: 16px;
+  margin-bottom: 30px;
+}
+
+.replacePrompt p {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #60A5FA;
+}
+
+/* ========== CARD COLLECTION ========== */
+
+.collection {
+  margin-top: 40px;
+}
+
+.collection h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 cartas por linha */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .deckGrid,
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cartas em mobile */
+  }
+  
+  .deckSlots {
+    flex-wrap: wrap;
+  }
+}

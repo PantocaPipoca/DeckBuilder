@@ -1,0 +1,57 @@
+/* src/styles/FilterBar.module.css */
+
+.filterBar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.sortButton {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  border: 2px solid #60A5FA;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.sortButton:hover {
+  background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
+}
+
+.sortButton:active {
+  transform: translateY(0);
+}
+
+.orderButton {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  border: 2px solid #818CF8;
+  border-radius: 8px;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orderButton:hover {
+  background: linear-gradient(135deg, #4F46E5, #4338CA);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
+}
+
+.orderButton:active {
+  transform: translateY(0);
+}
