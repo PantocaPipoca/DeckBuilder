@@ -5,7 +5,7 @@ import styles from '../styles/FilterBar.module.css';
 
 function FilterBar({ sortBy, order, onSortChange, onOrderChange } : FilterState) {
   
-  // Cicla entre: rarity → name → elixir
+  // Cicle through sortBy options
   function cycleSortBy() {
     const cycle: Record<SortBy, SortBy> = { 
       rarity: 'name', 
@@ -15,12 +15,12 @@ function FilterBar({ sortBy, order, onSortChange, onOrderChange } : FilterState)
     onSortChange(cycle[sortBy]);
   }
   
-  // Toggle entre asc ⇄ desc
+  // Toggle asc and desc
   function toggleOrder() {
     onOrderChange(order === 'asc' ? 'desc' : 'asc');
   }
   
-  // Label do botão
+  // Label for the sort button
   const sortLabel = {
     rarity: 'By Rarity',
     name: 'By Name',
@@ -29,12 +29,12 @@ function FilterBar({ sortBy, order, onSortChange, onOrderChange } : FilterState)
   
   return (
     <div className={styles.filterBar}>
-      {/* Botão de Sort (clica para ciclar) */}
+      {/* Sort Button */}
       <button className={styles.sortButton} onClick={cycleSortBy}>
         {sortLabel}
       </button>
       
-      {/* Botão de Order (▲ ou ▼) */}
+      {/* Order Button */}
       <button className={styles.orderButton} onClick={toggleOrder}>
         {order === 'asc' ? '▲' : '▼'}
       </button>

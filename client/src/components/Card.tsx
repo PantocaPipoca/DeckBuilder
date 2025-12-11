@@ -20,7 +20,7 @@ function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove 
   
   return (
     <div className={styles.cardWrapper}>
-      {/* A carta */}
+      {/* The card */}
       <div 
         className={`${styles.card} ${isSelected ? styles.selected : ''}`}
         onClick={onClick}
@@ -31,7 +31,7 @@ function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove 
         <div className={styles.cardName}>{card.name}</div>
       </div>
       
-      {/* Botões aparecem quando showButtons = true */}
+      {/* Buttons appear when showButtons = true */}
       {showButtons && (
         <div className={styles.buttonContainer}>
           <button className={styles.infoButton} onClick={onInfo}>

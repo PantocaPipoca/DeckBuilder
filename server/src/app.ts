@@ -19,8 +19,9 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+
 /**
- * Root endpoint providing basic API information
+ * Root endpoint providing basic information
  */
 app.get('/', (req, res) => {
   res.json({

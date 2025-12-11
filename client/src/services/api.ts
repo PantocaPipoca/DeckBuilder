@@ -1,7 +1,13 @@
 // src/services/api.ts
+
+/**
+ * This module is something of a bridge between the client and server
+ * It provides functions to interact with backend API endpoints
+ */
 import axios from 'axios';
 import type { Card, Deck, User } from '../types';
 
+// Here I use axios to simplify HTTP requests and avoid manually writing boilerplate code
 const api = axios.create({
   baseURL: 'http://localhost:4000/api',
   headers: {
@@ -18,26 +24,45 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+/**
+ * @returns All cards from the backend
+ */
 export const getAllCards = async (): Promise<Card[]> => {
   const response = await api.get('/cards');
   return response.data.data.cards;
 };
 
+/**
+ * @param id ID of the card to fetch
+ * @returns Card with given ID
+ */
 export const getCardById = async (id: number): Promise<Card> => {
   const response = await api.get(`/cards/${id}`);
   return response.data.data.card;
 };
 
+/**
+ * @param userId ID of the user whose decks to fetch
+ * @returns Array of decks of the user
+ */
 export const getUserDecks = async (userId: number): Promise<Deck[]> => {
   const response = await api.get(`/decks?ownerId=${userId}`);
   return response.data.data;
 };
 
+/**
+ * @param id ID of the deck to fetch
+ * @returns Deck with given ID
+ */
 export const getDeckById = async (id: number): Promise<Deck> => {
   const response = await api.get(`/decks/${id}`);
   return response.data.data;
 };
 
+/**
+ * @param data Deck creation data (name, description, cardNames, isPublic, ownerId)
+ * @returns Created deck
+ */
 export const createDeck = async (data: {
   name: string;
   description: string;
@@ -49,6 +74,11 @@ export const createDeck = async (data: {
   return response.data.data;
 };
 
+/**
+ * @param id ID of the deck to update
+ * @param data Update data (name?, description?, cardNames?, isPublic?)
+ * @returns Updated deck
+ */
 export const updateDeck = async (
   id: number,
   data: {
@@ -62,10 +92,17 @@ export const updateDeck = async (
   return response.data.data;
 };
 
+/**
+ * @param id ID of the deck to delete
+ */
 export const deleteDeck = async (id: number): Promise<void> => {
   await api.delete(`/decks/${id}`);
 };
 
+/**
+ * @param id ID of the deck to like
+ * @returns Updated like count
+ */
 export const likeDeck = async (id: number): Promise<number> => {
   const response = await api.post(`/decks/${id}/like`);
   return response.data.data.likes;

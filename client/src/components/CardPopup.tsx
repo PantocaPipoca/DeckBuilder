@@ -1,29 +1,24 @@
 // src/components/CardPopup.tsx
 
 import styles from '../styles/CardPopup.module.css';
-import type { Card } from '../types';
-
-interface CardPopupProps {
-  card: Card | null;
-  onClose: () => void;
-}
+import type { CardPopupProps } from '../types';
 
 function CardPopup({ card, onClose }: CardPopupProps) {
   if (!card) return null;
   
   return (
     <>
-      {/* Backdrop escuro (clica para fechar) */}
+      {/* Dark backdrop (click to close) */}
       <div className={styles.backdrop} onClick={onClose} />
       
       {/* Popup */}
       <div className={styles.popup}>
-        {/* Botão X para fechar */}
+        {/* Close button */}
         <button className={styles.closeButton} onClick={onClose}>
           ✕
         </button>
         
-        {/* Imagem grande da carta */}
+        {/* Large card image */}
         <img src={card.iconUrl} alt={card.name} className={styles.image} />
         
         {/* Info */}

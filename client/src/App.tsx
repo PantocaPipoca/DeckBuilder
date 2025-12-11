@@ -1,3 +1,4 @@
+// src/App.tsx
 import DecksPage from './pages/DecksPage';
 import './styles/global.css';
 

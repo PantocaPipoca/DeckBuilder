@@ -10,21 +10,23 @@ import type { Card as CardType, SortBy, SortOrder, Rarity } from '../types';
 
 function DecksPage() {
   
-  // ========== ESTADO ==========
-  
+  // Use State creates something like a variable in the first parameter and the setter function
+  // in the second parameter that updates the UI whenever it runs
+
   const [allCards, setAllCards] = useState<CardType[]>([]);
   const [decks, setDecks] = useState<CardType[][]>([[], [], [], [], []]);
   const [activeDeckIndex, setActiveDeckIndex] = useState<number>(0);
-  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+  const [selectedCard, setCardAsSelected] = useState<CardType | null>(null);
   const [isReplaceMode, setIsReplaceMode] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<SortBy>('rarity');
   const [order, setOrder] = useState<SortOrder>('desc');
   const [popupCard, setPopupCard] = useState<CardType | null>(null);
   
-  // Ref para scroll
+  // Reference for the deck to later have automatic scroll to the full deck
+  // Basically saves a reference to the html of the spot where we will scroll to
   const deckBuilderRef = useRef<HTMLDivElement>(null);
   
-  // ========== CARREGAR CARTAS ==========
+  // Load Cards
   
   useEffect(() => {
     loadCards();
@@ -32,19 +34,22 @@ function DecksPage() {
   
   async function loadCards() {
     const cards = await getAllCards();
-    setAllCards(cards);
+    setAllCards(cards); // Saves the data of cards in the state variable
   }
   
-  // ========== ORDENAR CARTAS ==========
+  // Sort Cards
   
   const sortedCards = [...allCards].sort((a, b) => {
     let comparison = 0;
     
     if (sortBy === 'name') {
+      // localeCompare used in case I decide to add different languages with accents
       comparison = a.name.localeCompare(b.name);
-    } else if (sortBy === 'elixir') {
+    }
+    else if (sortBy === 'elixir') {
       comparison = a.elixir - b.elixir;
-    } else if (sortBy === 'rarity') {
+    }
+    else if (sortBy === 'rarity') {
       const rarityOrder: Record<Rarity, number> = { COMMON: 0, RARE: 1, EPIC: 2, LEGENDARY: 3 };
       comparison = rarityOrder[a.rarity] - rarityOrder[b.rarity];
     }
@@ -52,31 +57,45 @@ function DecksPage() {
     return order === 'asc' ? comparison : -comparison;
   });
   
-  // ========== AÇÕES ==========
+  // Functions
   
+  /**
+   * Handles click on a card when in the collection
+   * @param card Card clicked
+   */
   function handleCollectionCardClick(card: CardType) {
-    setSelectedCard(card);
+    setCardAsSelected(card);
     setIsReplaceMode(false);
   }
   
+  /**
+   * Handles click of use button on a card thtats in the collection
+   * @param card Card to use
+   * @returns void
+   */
   function handleUseCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
     
     if (currentDeck.length >= 8) {
-      // Deck cheio - entra em replace mode
+      // Deck full enter replace mode
       setIsReplaceMode(true);
-      // Scroll para o deck
+      // Scroll to the deck
       deckBuilderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     
-    // Adiciona carta
+    // Add card normally
     const newDecks = [...decks];
     newDecks[activeDeckIndex] = [...currentDeck, card];
     setDecks(newDecks);
-    setSelectedCard(null);
+    setCardAsSelected(null);
   }
   
+  /**
+   * Handles click on a card when its in replace mode
+   * @param cardToReplace Card to replace in the deck
+   * @returns void
+   */
   function handleDeckCardClick(cardToReplace: CardType) {
     if (!isReplaceMode || !selectedCard) return;
     
@@ -90,10 +109,14 @@ function DecksPage() {
     setDecks(newDecks);
     
     // Reset
-    setSelectedCard(null);
+    setCardAsSelected(null);
     setIsReplaceMode(false);
   }
   
+  /**
+   * Removes a card from the current deck
+   * @param card Card to remove
+   */
   function handleRemoveCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
     const newDeck = currentDeck.filter(c => c.id !== card.id);
@@ -101,21 +124,23 @@ function DecksPage() {
     const newDecks = [...decks];
     newDecks[activeDeckIndex] = newDeck;
     setDecks(newDecks);
-    setSelectedCard(null);
+    setCardAsSelected(null);
   }
   
+  /**
+   * Switches active deck
+   * @param index Index of the deck to switch to
+   */
   function switchDeck(index: number) {
     setActiveDeckIndex(index);
-    setSelectedCard(null);
+    setCardAsSelected(null);
     setIsReplaceMode(false);
   }
-  
-  // ========== HELPERS ==========
   
   const currentDeck = decks[activeDeckIndex];
   const cardIdsInDeck = currentDeck.map(c => c.id);
   
-  // ========== RENDER ==========
+  // Render
   
   return (
     <div className={styles.page}>
@@ -147,7 +172,7 @@ function DecksPage() {
                 if (isReplaceMode) {
                   handleDeckCardClick(card);
                 } else {
-                  setSelectedCard(card);
+                  setCardAsSelected(card);
                 }
               }}
               onInfo={() => setPopupCard(card)}
@@ -155,14 +180,14 @@ function DecksPage() {
             />
           ))}
           
-          {/* Slots vazios */}
+          {/* Empty Slots */}
           {Array(8 - currentDeck.length).fill(0).map((_, i) => (
             <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
           ))}
         </div>
       </div>
       
-      {/* Replace Mode - Mostra carta selecionada */}
+      {/* Replace Mode - Shows selected card */}
       {isReplaceMode && selectedCard && (
         <div className={styles.replacePrompt}>
           <p>Click on a card in your deck to replace it</p>
@@ -176,7 +201,7 @@ function DecksPage() {
             className={styles.cancelButton}
             onClick={() => {
               setIsReplaceMode(false);
-              setSelectedCard(null);
+              setCardAsSelected(null);
             }}
           >
             Cancel
@@ -189,7 +214,7 @@ function DecksPage() {
         <div className={styles.collection}>
           <h2>Card Collection</h2>
           
-          {/* Filtros */}
+          {/* Filters */}
           <FilterBar
             sortBy={sortBy}
             order={order}
