@@ -1,214 +1,179 @@
 /* src/styles/Card.module.css */
 
-/**
- * EXPLICAÇÃO CSS PARA QUEM VEM DE JAVA:
- * 
- * CSS = Cascade Style Sheets (como definir aparência de componentes Swing)
- * 
- * Seletores:
- * .card { }       → classe (class="card")
- * #id { }         → ID (id="myId")
- * div { }         → tag
- * .card:hover { } → pseudo-classe (quando mouse em cima)
- */
-
-.cardWrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
 .card {
-  /* Layout */
   position: relative;
-  width: 120px;
-  height: 160px;
+  width: 100%;
+  aspect-ratio: 0.75;
   
-  /* Visual */
-  background: linear-gradient(145deg, #2a2d3a, #1f2229);
-  border-radius: 12px;
-  border: 2px solid #3a3f51;
-  
-  /* Sombra */
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 0 2px rgba(255, 255, 255, 0.05);
-  
-  /* Transição suave (animação) */
   transition: all 0.2s ease;
-  
-  /* Cursor pointer (mãozinha) */
   cursor: pointer;
-  
-  /* Overflow hidden (corta conteúdo que sai) */
-  overflow: hidden;
 }
 
-/* Hover effect (quando mouse em cima) */
+/* Hover effect */
 .card:hover {
   transform: scale(1.05) translateY(-4px);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.4),
-    0 0 20px var(--glow-color, #FFD700);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 30px var(--glow-color, #FFD700));
 }
 
-/* Estado selected (carta clicada) */
+/* Selected state */
 .card.selected {
-  /* Glow effect baseado na rarity */
-  box-shadow: 
-    0 0 30px var(--glow-color, #FFD700),
-    0 0 60px var(--glow-color, #FFD700),
-    0 8px 16px rgba(0, 0, 0, 0.5);
-  
-  /* Border brilhante */
-  border-color: var(--glow-color, #FFD700);
-  
-  /* Eleva a carta */
-  transform: scale(1.1) translateY(-8px);
-  z-index: 100;
+  /* Glow effect based on rarity */
+  filter: drop-shadow(0 0 15px var(--glow-color, #FFD700)) drop-shadow(0 0 30px var(--glow-color, #FFD700)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
 }
 
-/* Carta já no deck (disabled) */
-.card.inDeck {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(0.5);
-}
-
-.card.inDeck:hover {
-  transform: none;
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 0 0 2px rgba(255, 255, 255, 0.05);
-}
-
-/* Imagem da carta */
 .cardImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  pointer-events: none; /* Não interfere com clicks */
 }
 
-/* Badge de elixir (canto superior direito) */
+/* Elixir count*/
 .elixirBadge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  left: 4px;
+  scale: 120%;
   
-  /* Visual */
-  background: linear-gradient(135deg, #A855F7, #EC4899);
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  
-  /* Shape circular */
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  
-  /* Centralizar texto */
+  /* Layout */
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0;
   
-  /* Sombra */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  /* Visual of text */
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  text-shadow: 
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
-/* Nome da carta (rodapé) */
+.elixirImg {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  z-index: 1;
+}
+
+.elixirBadge > span {
+  position: relative;
+  z-index: 2;
+}
+
+/* Cards name */
 .cardName {
   position: absolute;
-  bottom: 0;
+  bottom: 15%;
   left: 0;
   right: 0;
+
   
   /* Visual */
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  background: transparent;
   color: white;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 800;
+  font-family: 'Impact';
   text-align: center;
   padding: 8px 4px;
+  letter-spacing: 0.5px;
   
-  /* Texto */
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  text-shadow: 
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000,
+    -2px 0 0 #000,
+    2px 0 0 #000,
+    0 -2px 0 #000,
+    0 2px 0 #000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  
+  /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-/* Container dos botões */
+/* Show name when card is selected */
+.card.selected .cardName {
+  opacity: 1;
+}
+
+/* Button container */
 .buttonContainer {
   display: flex;
   gap: 8px;
   margin-top: 4px;
+  width: 100%;
 }
 
-/* Estilos base para botões */
+/* Base styles for buttons */
 .infoButton,
 .useButton,
 .removeButton {
-  /* Layout */
-  padding: 8px 16px;
-  border: none;
-  border-radius: 6px;
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: 10px;
   
-  /* Texto */
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   
-  /* Cursor */
   cursor: pointer;
   
-  /* Transição */
   transition: all 0.2s ease;
   
-  /* Sombra */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Botão INFO (azul) */
 .infoButton {
   background: linear-gradient(135deg, #3B82F6, #2563EB);
+  border-color: #60A5FA;
   color: white;
 }
 
 .infoButton:hover {
   background: linear-gradient(135deg, #2563EB, #1D4ED8);
+  border-color: #3B82F6;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
 
-/* Botão USE (verde) */
 .useButton {
   background: linear-gradient(135deg, #10B981, #059669);
+  border-color: #34D399;
   color: white;
 }
 
 .useButton:hover {
   background: linear-gradient(135deg, #059669, #047857);
+  border-color: #10B981;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
 }
 
-/* Botão REMOVE (vermelho) */
 .removeButton {
   background: linear-gradient(135deg, #EF4444, #DC2626);
+  border-color: #EF4444;
   color: white;
 }
 
 .removeButton:hover {
   background: linear-gradient(135deg, #DC2626, #B91C1C);
+  border-color: #EF4444;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
 }
 
-/* Botões quando pressionados */
+/* Buttons when pressed */
 .infoButton:active,
 .useButton:active,
 .removeButton:active {
@@ -217,13 +182,11 @@
 }
 
 /**
- * RESPONSIVE
- * (para telas pequenas)
+ * (for small screens)
  */
 @media (max-width: 768px) {
   .card {
-    width: 100px;
-    height: 140px;
+    max-width: 100px;
   }
   
   .elixirBadge {

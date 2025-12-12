@@ -19,7 +19,7 @@ function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove 
   const glowColor = rarityColors[card.rarity];
   
   return (
-    <div className={styles.cardWrapper}>
+    <div>
       {/* The card */}
       <div 
         className={`${styles.card} ${isSelected ? styles.selected : ''}`}
@@ -27,7 +27,10 @@ function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove 
         style={{ '--glow-color': glowColor } as React.CSSProperties}
       >
         <img src={card.iconUrl} alt={card.name} className={styles.cardImage} />
-        <div className={styles.elixirBadge}>{card.elixir}</div>
+        <div className={styles.elixirBadge}>
+          <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirImg} />
+          <span>{card.elixir}</span>
+        </div>
         <div className={styles.cardName}>{card.name}</div>
       </div>
       

@@ -1,57 +1,75 @@
-/* src/styles/FilterBar.module.css */
+/* src/styles/FilterBar.module.css - ORDEM CORRETA */
 
 .filterBar {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
   justify-content: center;
+  align-items: center;
 }
 
-.sortButton {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #3B82F6, #2563EB);
-  border: 2px solid #60A5FA;
-  border-radius: 20px;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
-}
-
-.sortButton:hover {
-  background: linear-gradient(135deg, #2563EB, #1D4ED8);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4);
-}
-
-.sortButton:active {
-  transform: translateY(0);
-}
-
+/* Botão de ordem PRIMEIRO (esquerda) */
 .orderButton {
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, #6366F1, #4F46E5);
-  border: 2px solid #818CF8;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
+  border: 3px solid #60a5fa;
+  border-radius: 12px;
   color: white;
   font-size: 20px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #1e3a5f,
+    0 6px 12px rgba(74, 123, 181, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 900;
+  order: 1; /* Aparece primeiro */
 }
 
 .orderButton:hover {
-  background: linear-gradient(135deg, #4F46E5, #4338CA);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
+  box-shadow: 
+    0 6px 0 #1e3a5f,
+    0 8px 16px rgba(74, 123, 181, 0.6);
 }
 
 .orderButton:active {
-  transform: translateY(0);
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #1e3a5f,
+    0 4px 8px rgba(74, 123, 181, 0.4);
+}
+
+/* Botão de sort DEPOIS (direita) - AZUL */
+.sortButton {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
+  border: 3px solid #60a5fa;
+  border-radius: 14px;
+  color: white;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #1e3a5f,
+    0 6px 12px rgba(74, 123, 181, 0.4);
+  letter-spacing: 0.5px;
+  order: 2; /* Aparece depois */
+}
+
+.sortButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 #1e3a5f,
+    0 8px 16px rgba(74, 123, 181, 0.6);
+}
+
+.sortButton:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #1e3a5f,
+    0 4px 8px rgba(74, 123, 181, 0.4);
 }

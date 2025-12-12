@@ -8,7 +8,6 @@ function CardPopup({ card, onClose }: CardPopupProps) {
   
   return (
     <>
-      {/* Dark backdrop (click to close) */}
       <div className={styles.backdrop} onClick={onClose} />
       
       {/* Popup */}
@@ -18,32 +17,35 @@ function CardPopup({ card, onClose }: CardPopupProps) {
           ✕
         </button>
         
-        {/* Large card image */}
-        <img src={card.iconUrl} alt={card.name} className={styles.image} />
-        
-        {/* Info */}
-        <div className={styles.info}>
-          <h2 className={styles.name}>{card.name}</h2>
-          
-          <div className={styles.stats}>
-            <div className={styles.stat}>
-              <span className={styles.label}>Elixir</span>
-              <span className={styles.value}>{card.elixir}</span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.label}>Rarity</span>
-              <span className={`${styles.value} ${styles[card.rarity.toLowerCase()]}`}>
-                {card.rarity}
-              </span>
-            </div>
-            <div className={styles.stat}>
-              <span className={styles.label}>Type</span>
-              <span className={styles.value}>{card.type}</span>
+        {/* Top section: Card image on left, name and stats on right */}
+        <div className={styles.topSection}>
+          {/* Card image with elixir counter */}
+          <div className={styles.cardContainer}>
+            <img src={card.iconUrl} alt={card.name} className={styles.image} />
+            <div className={styles.elixirBadge}>
+              <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirImg} />
+              <span>{card.elixir}</span>
             </div>
           </div>
-          
-          <p className={styles.description}>{card.description}</p>
+          {/* Right side: name and stats */}
+          <div className={styles.statsBox}>
+            <h2 className={styles.name}>{card.name}</h2>
+            <div style={{ flex: 1 }} />
+            <div className={styles.statsRow}>
+              <div className={styles.statBox}>
+                <span className={styles.label}>Rarity</span>
+                <span className={`${styles.value} ${styles[card.rarity.toLowerCase()]}`}>{card.rarity}</span>
+              </div>
+              <div className={styles.statBox}>
+                <span className={styles.label}>Type</span>
+                <span className={styles.value}>{card.type}</span>
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* Description */}
+        <p className={styles.description}>{card.description}</p>
       </div>
     </>
   );
