@@ -43,6 +43,7 @@ model Deck {
   id          Int        @id @default(autoincrement())
   name        String
   description String
+  slot        Int        // Deck slot 0-4 for user's 5 deck slots
   isPublic    Boolean    @default(false)
   likes       Int        @default(0)
   avgElixir   Float
@@ -52,6 +53,7 @@ model Deck {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  @@unique([ownerId, slot])
   @@index([isPublic])
   @@index([likes])
 }

@@ -120,6 +120,8 @@ export class DeckService {
       data: {
         name: data.name,
         description: data.description,
+
+        slot: data.slot,
         isPublic: data.isPublic,
         ownerId: data.ownerId,
         avgElixir,
@@ -134,7 +136,7 @@ export class DeckService {
         cards: {
           select: {
             position: true,
-            card: { select: { name: true, elixir: true, rarity: true } },
+            card: true,
           },
           orderBy: { position: 'asc' },
         },
@@ -202,6 +204,7 @@ export class DeckService {
           ...(data.name !== undefined && { name: data.name }),
           ...(data.description !== undefined && { description: data.description }),
           ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+          ...(data.slot !== undefined && { slot: data.slot }),
           avgElixir,
           cards: {
             create: data.cardNames.map((cardName: string, index: number) => ({
@@ -232,6 +235,7 @@ export class DeckService {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.description !== undefined && { description: data.description }),
         ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+        ...(data.slot !== undefined && { slot: data.slot }),
       },
       include: {
         cards: {

@@ -1,33 +1,102 @@
 // src/pages/DecksPage.tsx
 import { useState, useEffect, useRef } from 'react';
-import { getAllCards } from '../services/api';
+import { getAllCards, getUserDecks, createDeck, updateDeck, deleteDeck } from '../services/api';
 import Card from '../components/Card';
 import FilterBar from '../components/FilterBar';
 import CardPopup from '../components/CardPopup';
 import styles from '../styles/DecksPage.module.css';
 import type { Card as CardType, SortBy, SortOrder, Rarity } from '../types';
 
+// Using the test user from seed.ts
+const USER_ID = 1;
+
 function DecksPage() {
   // Estados
   const [allCards, setAllCards] = useState<CardType[]>([]);
   const [decks, setDecks] = useState<CardType[][]>([[], [], [], [], []]);
+  const [deckIds, setDeckIds] = useState<(number | null)[]>([null, null, null, null, null]);
   const [activeDeckIndex, setActiveDeckIndex] = useState<number>(0);
   const [selectedCard, setCardAsSelected] = useState<CardType | null>(null);
   const [isReplaceMode, setIsReplaceMode] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<SortBy>('rarity');
   const [order, setOrder] = useState<SortOrder>('desc');
   const [popupCard, setPopupCard] = useState<CardType | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const deckBuilderRef = useRef<HTMLDivElement>(null);
 
-  // Load cards
+  // Load cards and user's saved decks on mount
   useEffect(() => {
-    loadCards();
+    loadAllData();
   }, []);
 
-  async function loadCards() {
-    const cards = await getAllCards();
-    setAllCards(cards || []);
+  async function loadAllData() {
+    try {
+      setLoading(true);
+      const cards = await getAllCards();
+      setAllCards(cards || []);
+
+      // Load user's existing decks
+      const userDecks = await getUserDecks(USER_ID);
+      
+      const newDecks: CardType[][] = [[], [], [], [], []];
+      const newDeckIds: (number | null)[] = [null, null, null, null, null];
+
+      // Map backend decks to slots using their slot field
+      userDecks.forEach((deck: any) => {
+        if (deck.slot >= 0 && deck.slot < 5) {
+          // Extract cards from deck.cards array and find full card data
+          const deckCards = deck.cards
+            .sort((a: any, b: any) => a.position - b.position)
+            .map((dc: any) => {
+              const fullCard = cards.find((c: CardType) => c.name === dc.card.name);
+              return fullCard;
+            })
+            .filter(Boolean) as CardType[];
+          
+          newDecks[deck.slot] = deckCards;
+          newDeckIds[deck.slot] = deck.id;
+        }
+      });
+
+      setDecks(newDecks);
+      setDeckIds(newDeckIds);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Save or update deck when it has exactly 8 cards
+  async function saveDeckIfComplete(deckIndex: number, cards: CardType[]) {
+    if (cards.length !== 8) return;
+
+    try {
+      const cardNames = cards.map(c => c.name);
+      const deckData = {
+        name: `Deck ${deckIndex + 1}`,
+        description: `Auto-saved deck slot ${deckIndex + 1}`,
+        cardNames,
+        slot: deckIndex,
+        isPublic: false,
+        ownerId: USER_ID
+      };
+
+      if (deckIds[deckIndex]) {
+        // Update existing deck
+        await updateDeck(deckIds[deckIndex]!, deckData);
+      } else {
+        // Create new deck
+        const newDeck = await createDeck(deckData);
+        const newDeckIds = [...deckIds];
+        newDeckIds[deckIndex] = newDeck.id;
+        setDeckIds(newDeckIds);
+      }
+    } catch (error) {
+      console.error('Error saving deck:', error);
+      alert('Failed to save deck. Please try again.');
+    }
   }
 
   // Sorted cards
@@ -48,7 +117,7 @@ function DecksPage() {
     setIsReplaceMode(false);
   }
 
-  function handleUseCard(card: CardType) {
+  async function handleUseCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
     if (currentDeck.length >= 8) {
       setIsReplaceMode(true);
@@ -56,12 +125,18 @@ function DecksPage() {
       return;
     }
     const newDecks = [...decks];
-    newDecks[activeDeckIndex] = [...currentDeck, card];
+    const updatedDeck = [...currentDeck, card];
+    newDecks[activeDeckIndex] = updatedDeck;
     setDecks(newDecks);
     setCardAsSelected(null);
+
+    // Auto-save when deck reaches 8 cards
+    if (updatedDeck.length === 8) {
+      await saveDeckIfComplete(activeDeckIndex, updatedDeck);
+    }
   }
 
-  function handleDeckCardClick(cardToReplace: CardType) {
+  async function handleDeckCardClick(cardToReplace: CardType) {
     if (!isReplaceMode || !selectedCard) return;
     const currentDeck = decks[activeDeckIndex];
     const newDeck = currentDeck.map(c => (c.id === cardToReplace.id ? selectedCard : c));
@@ -70,6 +145,9 @@ function DecksPage() {
     setDecks(newDecks);
     setCardAsSelected(null);
     setIsReplaceMode(false);
+
+    // Auto-save after replacement (deck is still 8 cards)
+    await saveDeckIfComplete(activeDeckIndex, newDeck);
   }
 
   function handleRemoveCard(card: CardType) {
@@ -79,6 +157,27 @@ function DecksPage() {
     newDecks[activeDeckIndex] = newDeck;
     setDecks(newDecks);
     setCardAsSelected(null);
+    // Don't save incomplete decks
+  }
+
+  async function handleClearDeck() {
+    if (!window.confirm('Clear this deck? This will delete it from the server.')) return;
+
+    const newDecks = [...decks];
+    newDecks[activeDeckIndex] = [];
+    setDecks(newDecks);
+
+    // Delete from backend if it exists
+    if (deckIds[activeDeckIndex]) {
+      try {
+        await deleteDeck(deckIds[activeDeckIndex]!);
+        const newDeckIds = [...deckIds];
+        newDeckIds[activeDeckIndex] = null;
+        setDeckIds(newDeckIds);
+      } catch (error) {
+        console.error('Error deleting deck:', error);
+      }
+    }
   }
 
   function switchDeck(index: number) {
@@ -93,6 +192,17 @@ function DecksPage() {
   const avgElixir = currentDeck.length > 0
     ? (currentDeck.reduce((s, c) => s + c.elixir, 0) / currentDeck.length).toFixed(1)
     : '0.0';
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.loadingContainer}>
+          Loading decks...
+        </div>
+      </div>
+    );
+  }
 
   // Render
   return (
@@ -111,10 +221,20 @@ function DecksPage() {
           ))}
         </div>
 
-        {/* Deck Builder I give the ref for autoscroll */}
+        {/* Deck Builder */}
         <div ref={deckBuilderRef} className={styles.deckSection}>
           <div className={styles.deckHeader}>
-            <h2 style={{ visibility: 'hidden' }}>Your Deck ({currentDeck.length}/8)</h2>
+            <h2>
+              Your Deck ({currentDeck.length}/8)
+            </h2>
+            {currentDeck.length > 0 && (
+              <button
+                onClick={handleClearDeck}
+                className={styles.clearButton}
+              >
+                CLEAR DECK
+              </button>
+            )}
           </div>
           <div className={styles.deckGrid}>
             {currentDeck.map(card => (

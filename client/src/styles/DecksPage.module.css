@@ -285,6 +285,37 @@
   display: none;
 }
 
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.clearButton {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 3px solid #f87171;
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #b91c1c;
+  transition: all 0.15s;
+}
+
+.clearButton:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #b91c1c;
+}
+
+.deckSlot {
+  position: relative;
+}
+
 @media (max-width: 768px) {
   .deckGrid {
     grid-template-columns: repeat(4, 1fr);

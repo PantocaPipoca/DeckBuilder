@@ -60,13 +60,14 @@ export const getDeckById = async (id: number): Promise<Deck> => {
 };
 
 /**
- * @param data Deck creation data (name, description, cardNames, isPublic, ownerId)
+ * @param data Deck creation data (name, description, cardNames, slot, isPublic, ownerId)
  * @returns Created deck
  */
 export const createDeck = async (data: {
   name: string;
   description: string;
   cardNames: string[];
+  slot: number;
   isPublic: boolean;
   ownerId: number;
 }): Promise<Deck> => {

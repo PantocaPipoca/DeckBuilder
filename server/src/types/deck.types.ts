@@ -7,6 +7,7 @@
  * @property name: deck name
  * @property description: deck description
  * @property cardNames: array of 8 card names
+ * @property slot: deck slot number 0-4
  * @property isPublic: is the deck publicly visible
  * @property ownerId: deck owner's id
  */
@@ -14,6 +15,7 @@ export interface CreateDeckDTO {
   name: string;
   description: string;
   cardNames: string[];
+  slot: number;
   isPublic: boolean;
   ownerId: number;
 }
@@ -25,12 +27,14 @@ export interface CreateDeckDTO {
  * @property name: deck name
  * @property description: deck description
  * @property cardNames: array of 8 card names
+ * @property slot: deck slot number
  * @property isPublic: is the deck publicly visible
  */
 export interface UpdateDeckDTO {
   name?: string;
   description?: string;
   cardNames?: string[];
+  slot?: number;
   isPublic?: boolean;
 }
 
