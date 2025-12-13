@@ -1,16 +1,17 @@
 // src/pages/DecksPage.tsx
 import { useState, useEffect, useRef } from 'react';
 import { getAllCards, getUserDecks, createDeck, updateDeck, deleteDeck } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import Header from '../components/Header';
 import Card from '../components/Card';
 import FilterBar from '../components/FilterBar';
 import CardPopup from '../components/CardPopup';
 import styles from '../styles/DecksPage.module.css';
 import type { Card as CardType, SortBy, SortOrder, Rarity } from '../types';
 
-// Using the test user from seed.ts
-const USER_ID = 1;
-
 function DecksPage() {
+  const { user } = useAuth();
+  
   // Estados
   const [allCards, setAllCards] = useState<CardType[]>([]);
   const [decks, setDecks] = useState<CardType[][]>([[], [], [], [], []]);
@@ -37,7 +38,7 @@ function DecksPage() {
       setAllCards(cards || []);
 
       // Load user's existing decks
-      const userDecks = await getUserDecks(USER_ID);
+      const userDecks = await getUserDecks();
       
       const newDecks: CardType[][] = [[], [], [], [], []];
       const newDeckIds: (number | null)[] = [null, null, null, null, null];
@@ -80,7 +81,6 @@ function DecksPage() {
         cardNames,
         slot: deckIndex,
         isPublic: false,
-        ownerId: USER_ID
       };
 
       if (deckIds[deckIndex]) {
@@ -196,147 +196,151 @@ function DecksPage() {
   // Loading state
   if (loading) {
     return (
-      <div className={styles.page}>
-        <div className={styles.loadingContainer}>
-          Loading decks...
+      <>
+        <Header />
+        <div className={styles.page}>
+          <div className={styles.loadingContainer}>
+            Loading decks...
+          </div>
         </div>
-      </div>
+      </>
     );
   }
-
-  // Render
   return (
-    <div className={styles.page}>
-      <div className={styles.deckBuilder}>
-        {/* Deck slots */}
-        <div className={styles.deckSlots}>
-          {[0, 1, 2, 3, 4].map(index => (
-            <button
-              key={index}
-              className={`${styles.deckSlot} ${index === activeDeckIndex ? styles.active : ''}`}
-              onClick={() => switchDeck(index)}
-            >
-              {index + 1}
-            </button>
-          ))}
-        </div>
-
-        {/* Deck Builder */}
-        <div ref={deckBuilderRef} className={styles.deckSection}>
-          <div className={styles.deckHeader}>
-            <h2>
-              Your Deck ({currentDeck.length}/8)
-            </h2>
-            {currentDeck.length > 0 && (
+    <>
+      <Header />
+      <div className={styles.page}>
+        <div className={styles.deckBuilder}>
+          {/* Deck slots */}
+          <div className={styles.deckSlots}>
+            {[0, 1, 2, 3, 4].map(index => (
               <button
-                onClick={handleClearDeck}
-                className={styles.clearButton}
+                key={index}
+                className={`${styles.deckSlot} ${index === activeDeckIndex ? styles.active : ''}`}
+                onClick={() => switchDeck(index)}
               >
-                CLEAR DECK
+                {index + 1}
               </button>
-            )}
-          </div>
-          <div className={styles.deckGrid}>
-            {currentDeck.map(card => (
-              <div key={card.id} className={isReplaceMode ? styles.shaking : ''}>
-                <Card
-                  card={card}
-                  isSelected={false}
-                  showButtons={selectedCard?.id === card.id && !isReplaceMode}
-                  onClick={() => {
-                    if (isReplaceMode) handleDeckCardClick(card);
-                    else setCardAsSelected(card);
-                  }}
-                  onInfo={() => setPopupCard(card)}
-                  onRemove={() => handleRemoveCard(card)}
-                />
-              </div>
-            ))}
-
-            {Array(8 - currentDeck.length).fill(0).map((_, i) => (
-              <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
             ))}
           </div>
-          
-          <div className={styles.avgElixir}>
-            <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirIcon} />
-            <span>{avgElixir}</span>
-          </div>
-        </div>
 
-        {/* Replace Mode */}
-        {isReplaceMode && selectedCard && (
-          <div className={styles.replacePrompt} style={{ marginTop: 12 }}>
-            <p>Click on a card in your deck to replace it</p>
-            <Card
-              card={selectedCard}
-              isSelected={true}
-              showButtons={false}
-              onClick={() => {}}
+          {/* Deck Builder */}
+          <div ref={deckBuilderRef} className={styles.deckSection}>
+            <div className={styles.deckHeader}>
+              <h2>
+                Your Deck ({currentDeck.length}/8)
+              </h2>
+              {currentDeck.length > 0 && (
+                <button
+                  onClick={handleClearDeck}
+                  className={styles.clearButton}
+                >
+                  CLEAR DECK
+                </button>
+              )}
+            </div>
+            <div className={styles.deckGrid}>
+              {currentDeck.map(card => (
+                <div key={card.id} className={isReplaceMode ? styles.shaking : ''}>
+                  <Card
+                    card={card}
+                    isSelected={false}
+                    showButtons={selectedCard?.id === card.id && !isReplaceMode}
+                    onClick={() => {
+                      if (isReplaceMode) handleDeckCardClick(card);
+                      else setCardAsSelected(card);
+                    }}
+                    onInfo={() => setPopupCard(card)}
+                    onRemove={() => handleRemoveCard(card)}
+                  />
+                </div>
+              ))}
+
+              {Array(8 - currentDeck.length).fill(0).map((_, i) => (
+                <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
+              ))}
+            </div>
+            
+            <div className={styles.avgElixir}>
+              <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirIcon} />
+              <span>{avgElixir}</span>
+            </div>
+          </div>
+
+          {/* Replace Mode */}
+          {isReplaceMode && selectedCard && (
+            <div className={styles.replacePrompt} style={{ marginTop: 12 }}>
+              <p>Click on a card in your deck to replace it</p>
+              <Card
+                card={selectedCard}
+                isSelected={true}
+                showButtons={false}
+                onClick={() => {}}
+              />
+              <button
+                className={styles.cancelButton}
+                onClick={() => {
+                  setIsReplaceMode(false);
+                  setCardAsSelected(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {/* Card Collection */}
+          <div className={`${styles.collection} ${isReplaceMode ? styles.hidden : ''}`}>
+            <div className={styles.separator}></div>
+
+            <div className={styles.filterWrapper}>
+              <h2 className={styles.collectionTitle}>Card Collection</h2>
+              <FilterBar
+                sortBy={sortBy}
+                order={order}
+                onSortChange={(s) => setSortBy(s)}
+                onOrderChange={(o) => setOrder(o)}
+              />
+            </div>
+
+            {/* Cards grid */}
+            <div className={styles.cardGrid}>
+              {sortedCards.length === 0 ? (
+                <div className={styles.cardLoading}>
+                  Loading cards...
+                </div>
+              ) : (
+                sortedCards.map(card => {
+                  const inDeck = cardIdsInDeck.includes(card.id);
+                  const isSelected = selectedCard?.id === card.id;
+
+                  return (
+                    <div key={card.id} className={inDeck ? styles.cardInDeck : ''}>
+                      <Card
+                        card={card}
+                        isSelected={isSelected}
+                        showButtons={isSelected && !inDeck}
+                        onClick={() => !inDeck && handleCollectionCardClick(card)}
+                        onInfo={() => setPopupCard(card)}
+                        onUse={() => handleUseCard(card)}
+                      />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Popup of Info */}
+          {popupCard && (
+            <CardPopup
+              card={popupCard}
+              onClose={() => setPopupCard(null)}
             />
-            <button
-              className={styles.cancelButton}
-              onClick={() => {
-                setIsReplaceMode(false);
-                setCardAsSelected(null);
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        {/* Card Collection */}
-        <div className={`${styles.collection} ${isReplaceMode ? styles.hidden : ''}`}>
-          <div className={styles.separator}></div>
-
-          <div className={styles.filterWrapper}>
-            <h2 className={styles.collectionTitle}>Card Collection</h2>
-            <FilterBar
-              sortBy={sortBy}
-              order={order}
-              onSortChange={(s) => setSortBy(s)}
-              onOrderChange={(o) => setOrder(o)}
-            />
-          </div>
-
-          {/* Cards grid */}
-          <div className={styles.cardGrid}>
-            {sortedCards.length === 0 ? (
-              <div className={styles.cardLoading}>
-                Loading cards...
-              </div>
-            ) : (
-              sortedCards.map(card => {
-                const inDeck = cardIdsInDeck.includes(card.id);
-                const isSelected = selectedCard?.id === card.id;
-
-                return (
-                  <div key={card.id} className={inDeck ? styles.cardInDeck : ''}>
-                    <Card
-                      card={card}
-                      isSelected={isSelected}
-                      showButtons={isSelected && !inDeck}
-                      onClick={() => !inDeck && handleCollectionCardClick(card)}
-                      onInfo={() => setPopupCard(card)}
-                      onUse={() => handleUseCard(card)}
-                    />
-                  </div>
-                );
-              })
-            )}
-          </div>
+          )}
         </div>
-
-        {/* Popup of Info */}
-        {popupCard && (
-          <CardPopup
-            card={popupCard}
-            onClose={() => setPopupCard(null)}
-          />
-        )}
       </div>
-    </div>
+    </>
   );
 }
 

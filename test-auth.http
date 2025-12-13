@@ -1,0 +1,165 @@
+### Test Authentication API
+### Use the REST Client extension in VS Code to run these requests
+
+@baseUrl = http://localhost:4000
+@apiUrl = {{baseUrl}}/api
+
+### Variables (will be set after login)
+@authToken = your_token_here
+
+### ============================================
+### 1. REGISTER NEW USER
+### ============================================
+
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@examples.com",
+  "password": "password123",
+  "name": "Test User"
+}
+
+### ============================================
+### 2. LOGIN
+### ============================================
+
+# @name login
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@examples.com",
+  "password": "password123"
+}
+
+### ============================================
+### 3. LOGIN WITH SEEDED USER (from seed.ts)
+### ============================================
+
+# @name loginSeeded
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "pantas@example.com",
+  "password": "password123"
+}
+
+### ============================================
+### 4. GET CURRENT USER (Protected Route)
+### ============================================
+### After logging in, copy the token from response and replace @authToken above
+
+GET {{apiUrl}}/auth/me
+Authorization: Bearer {{authToken}}
+
+### ============================================
+### 5. CREATE DECK (Protected - requires auth)
+### ============================================
+
+POST {{apiUrl}}/decks
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "My Protected Deck",
+  "description": "Created with authentication",
+  "cardNames": ["Knight", "Archers", "Fireball", "Zap", "Hog Rider", "Musketeer", "Giant", "Arrows"],
+  "slot": 3,
+  "isPublic": false,
+  "ownerId": 1
+}
+
+### ============================================
+### 6. GET MY DECKS (Protected)
+### ============================================
+
+GET {{apiUrl}}/decks?ownerId=1
+Authorization: Bearer {{authToken}}
+
+### ============================================
+### 7. UPDATE MY DECK (Protected - must own the deck)
+### ============================================
+
+PUT {{apiUrl}}/decks/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Deck Name",
+  "description": "Updated description"
+}
+
+### ============================================
+### 8. DELETE MY DECK (Protected - must own the deck)
+### ============================================
+
+DELETE {{apiUrl}}/decks/1
+Authorization: Bearer {{authToken}}
+
+### ============================================
+### ERROR TESTING - Authentication Failures
+### ============================================
+
+### ERROR 1: Register with existing email (should fail)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Another User"
+}
+
+### ERROR 2: Login with wrong password (should fail)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "wrongpassword"
+}
+
+### ERROR 3: Login with non-existent user (should fail)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@example.com",
+  "password": "password123"
+}
+
+### ERROR 4: Access protected route without token (should fail - 401)
+GET {{apiUrl}}/auth/me
+
+### ERROR 5: Access protected route with invalid token (should fail - 401)
+GET {{apiUrl}}/auth/me
+Authorization: Bearer invalid_token_here
+
+### ERROR 6: Try to update someone else's deck (should fail - 404)
+PUT {{apiUrl}}/decks/999
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "Trying to hack"
+}
+
+### ERROR 7: Register without required fields (should fail - 400)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "incomplete@example.com"
+}
+
+### ERROR 8: Register with invalid email format (should fail - 400)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "not-an-email",
+  "password": "password123",
+  "name": "Bad Email"
+}

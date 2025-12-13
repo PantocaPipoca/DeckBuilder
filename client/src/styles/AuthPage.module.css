@@ -1,0 +1,165 @@
+/* client/src/styles/AuthPage.module.css */
+
+.page {
+  min-height: 100vh;
+  background-image: url('/src/assets/cr-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.card {
+  background: rgba(26, 47, 77, 0.95);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  border: 3px solid rgba(74, 123, 181, 0.5);
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffd700;
+  text-align: center;
+  margin-bottom: 30px;
+  text-shadow: 
+    2px 2px 0 #1a1d29,
+    -1px -1px 0 #1a1d29,
+    1px -1px 0 #1a1d29,
+    -1px 1px 0 #1a1d29;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.error {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 20px;
+  color: #fecaca;
+  text-align: center;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputGroup label {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.inputGroup input {
+  padding: 12px 16px;
+  background: rgba(30, 58, 95, 0.5);
+  border: 2px solid rgba(74, 123, 181, 0.5);
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  background: rgba(30, 58, 95, 0.7);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.inputGroup input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.inputGroup input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  margin-top: 10px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
+  border: 3px solid #60a5fa;
+  border-radius: 12px;
+  color: white;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #1e3a5f,
+    0 6px 12px rgba(74, 123, 181, 0.4);
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 #1e3a5f,
+    0 8px 16px rgba(74, 123, 181, 0.6);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #1e3a5f,
+    0 4px 8px rgba(74, 123, 181, 0.4);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.linkText {
+  margin-top: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+.linkText a {
+  color: #60a5fa;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.linkText a:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 30px 20px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

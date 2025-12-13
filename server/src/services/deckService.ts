@@ -1,26 +1,17 @@
-// src/services/deckService.ts
+// server/src/services/deckService.ts
 import prisma from '../configs/database';
 import { CreateDeckDTO, UpdateDeckDTO, DeckQueryParams } from '../types/deck.types';
 import { DECK_CONFIG } from '../configs/constants';
 import { HTTP_STATUS } from '../configs/constants';
 
-
 /**
- * Essencially this is a class that provides static methods to manage decks IN THE DATABASE.
- * Used by the DeckController.
+ * Service for managing decks in the database
+ * Now includes ownership validation
  */
-
 export class DeckService {
 
   /**
-   * Lists decks with optional filtering
-   * 
-   * @param params: query parameters for filtering and pagination
-   * @param params.onlyPublic: return only public decks
-   * @param params.ownerId: filter by owner ID
-   * @param params.limit: maximum results (default: 50)
-   * @param params.offset: skip n results (default: 0)
-   * @returns array of decks with owner information
+   * Lists decks with ownership filter
    */
   static async listDecks(params: DeckQueryParams = {}) {
     const { onlyPublic, ownerId, limit = 50, offset = 0 } = params;
@@ -50,13 +41,9 @@ export class DeckService {
   }
 
   /**
-   * Gets a single deck by ID
-   * 
-   * @param id: deck ID
-   * @returns deck with owner information
-   * @throws error with statusCode 404 if deck not found
+   * Gets a single deck by ID with ownership validation
    */
-  static async getDeckById(id: number) {
+  static async getDeckById(id: number, userId?: number) {
     const deck = await prisma.deck.findUnique({
       where: { id },
       include: {
@@ -70,30 +57,62 @@ export class DeckService {
       },
     });
 
-    if (!deck) throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck not found' };
+    if (!deck) {
+      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck not found' };
+    }
+
+    // Validate ownership if userId provided
+    if (userId && deck.ownerId !== userId) {
+      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck not found' };
+    }
+
     return deck;
   }
 
   /**
+   * Validates that a user owns a specific deck slot
+   */
+  private static async validateSlotOwnership(userId: number, slot: number, excludeDeckId?: number) {
+    const where: any = { ownerId: userId, slot };
+    if (excludeDeckId) {
+      where.id = { not: excludeDeckId };
+    }
+
+    const existingDeck = await prisma.deck.findFirst({ where });
+
+    if (existingDeck) {
+      throw { 
+        statusCode: HTTP_STATUS.CONFLICT, 
+        message: `Slot ${slot} already has a deck. Delete it first or choose another slot.` 
+      };
+    }
+  }
+
+  /**
    * Creates a new deck
-   * 
-   * @param data: deck creation data
-   * @returns created deck with owner information
-   * @throws error with statusCode 400 if validation fails
    */
   static async createDeck(data: CreateDeckDTO) {
+    // Validate slot ownership
+    await this.validateSlotOwnership(data.ownerId, data.slot);
+
     // Validate card count
     if (!data.cardNames || data.cardNames.length !== DECK_CONFIG.CARDS_PER_DECK) {
-      throw { statusCode: HTTP_STATUS.BAD_REQUEST, message: `Deck must have exactly ${DECK_CONFIG.CARDS_PER_DECK} cards` };
+      throw { 
+        statusCode: HTTP_STATUS.BAD_REQUEST, 
+        message: `Deck must have exactly ${DECK_CONFIG.CARDS_PER_DECK} cards` 
+      };
     }
 
-    // Validate unique cards (no duplicates)
+    // Validate unique cards
     const uniqueCards = new Set(data.cardNames);
     if (uniqueCards.size !== DECK_CONFIG.CARDS_PER_DECK) {
-      throw { statusCode: HTTP_STATUS.BAD_REQUEST, message: 'You cannot repeat same cards in the deck' };
+      throw { 
+        statusCode: HTTP_STATUS.BAD_REQUEST, 
+        message: 'You cannot repeat same cards in the deck' 
+      };
     }
 
-    // Verify all cards exist and get their IDs
+    // Verify all cards exist
     const cards = await prisma.card.findMany({
       where: { name: { in: data.cardNames } },
     });
@@ -105,7 +124,6 @@ export class DeckService {
       };
     }
 
-    // Create a map of card names to IDs to preserve order
     const cardNameToId = new Map(cards.map(card => [card.name, card.id]));
 
     // Calculate average elixir
@@ -115,12 +133,11 @@ export class DeckService {
     }
     const avgElixir = Math.round((totalElixir / DECK_CONFIG.CARDS_PER_DECK) * 10) / 10;
 
-    // Create deck with cards
+    // Create deck
     const deck = await prisma.deck.create({
       data: {
         name: data.name,
         description: data.description,
-
         slot: data.slot,
         isPublic: data.isPublic,
         ownerId: data.ownerId,
@@ -148,30 +165,34 @@ export class DeckService {
 
     return deck;
   }
-
+  
   /**
-   * Updates an existing deck
-   * Only provided fields will be updated.
-   * 
-   * @param id: deck ID to update
-   * @param data: fields to update
-   * @returns updated deck with owner information
-   * @throws error 404 if deck not found
-   * @throws error 400 if validation fails
+   * Updates an existing deck with ownership validation
    */
-  static async updateDeck(id: number, data: UpdateDeckDTO) {
-    // Verify deck exists
-    await this.getDeckById(id);
+  static async updateDeck(id: number, data: UpdateDeckDTO, userId: number) {
+    // Verify deck exists and user owns it
+    const existingDeck = await this.getDeckById(id, userId);
 
-    // If cards to update validate and recalculate elixir
+    // If changing slot, validate new slot
+    if (data.slot !== undefined && data.slot !== existingDeck.slot) {
+      await this.validateSlotOwnership(userId, data.slot, id);
+    }
+
+    // If updating cards
     if (data.cardNames) {
       if (data.cardNames.length !== DECK_CONFIG.CARDS_PER_DECK) {
-        throw { statusCode: HTTP_STATUS.BAD_REQUEST, message: `Deck deve ter exatamente ${DECK_CONFIG.CARDS_PER_DECK} cartas` };
+        throw { 
+          statusCode: HTTP_STATUS.BAD_REQUEST, 
+          message: `Deck must have exactly ${DECK_CONFIG.CARDS_PER_DECK} cards` 
+        };
       }
 
       const uniqueCards = new Set(data.cardNames);
       if (uniqueCards.size !== DECK_CONFIG.CARDS_PER_DECK) {
-        throw { statusCode: HTTP_STATUS.BAD_REQUEST, message: 'Não podes repetir cartas no deck' };
+        throw { 
+          statusCode: HTTP_STATUS.BAD_REQUEST, 
+          message: 'You cannot repeat same cards in the deck' 
+        };
       }
 
       const cards = await prisma.card.findMany({
@@ -181,11 +202,10 @@ export class DeckService {
       if (cards.length !== DECK_CONFIG.CARDS_PER_DECK) {
         throw { 
           statusCode: HTTP_STATUS.BAD_REQUEST, 
-          message: `Apenas ${cards.length}/${DECK_CONFIG.CARDS_PER_DECK} cartas existem. Verifica os nomes.` 
+          message: `Only ${cards.length}/${DECK_CONFIG.CARDS_PER_DECK} cards exist. Check the names.` 
         };
       }
 
-      // Create a map of card names to IDs to preserve order
       const cardNameToId = new Map(cards.map(card => [card.name, card.id]));
 
       // Delete old cards
@@ -228,7 +248,7 @@ export class DeckService {
       });
     }
 
-    // Ifo no cards to update
+    // If no cards to update
     return prisma.deck.update({
       where: { id },
       data: {
@@ -253,15 +273,11 @@ export class DeckService {
   }
 
   /**
-   * Deletes a deck
-   * 
-   * @param id: deck ID to delete
-   * @returns deleted deck data
-   * @throws error 404 if deck not found
+   * Deletes a deck with ownership validation
    */
-  static async deleteDeck(id: number) {
-    // Verifica se existe
-    await this.getDeckById(id);
+  static async deleteDeck(id: number, userId: number) {
+    // Verify deck exists and user owns it
+    await this.getDeckById(id, userId);
 
     return prisma.deck.delete({
       where: { id },
@@ -269,14 +285,9 @@ export class DeckService {
   }
 
   /**
-   * Increments the like count for a deck
-   * 
-   * @param id: deck ID to like
-   * @returns updated like count
-   * @throws error 404 if deck not found
+   * Increments like count
    */
   static async likeDeck(id: number) {
-    // Verifica se existe
     await this.getDeckById(id);
 
     const deck = await prisma.deck.update({
@@ -288,9 +299,7 @@ export class DeckService {
   }
 
   /**
-   * Gets all decks statistics
-   * 
-   * @returns Statistics object with total, public, private decks and total likes
+   * Gets deck statistics
    */
   static async getStats() {
     const [totalDecks, publicDecks, totalCards, avgDeckElixir] = await Promise.all([

@@ -4,30 +4,21 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { HTTP_STATUS } from '../configs/constants';
 
 /**
- * Essencially this is a class that provides static methods to manage decks.
- * Made to use in REST API routes.
+ * Controller for deck operations
+ * Now uses authenticated user from request
  */
 export class DeckController {
   /**
-   * Lists all decks with optional filtering
+   * Lists all decks for the authenticated user
    * 
    * @route GET /api/decks
-   * @query onlyPublic: filter for public decks only
-   * @query ownerId: filter by owner ID
-   * @query limit: maximum results to return
-   * @query offset: number of results to skip
+   * @requires authentication
    */
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
-    const onlyPublic = req.query.onlyPublic === 'true';
-    const ownerId = req.query.ownerId ? Number(req.query.ownerId) : undefined;
-    const limit = req.query.limit ? Number(req.query.limit) : undefined;
-    const offset = req.query.offset ? Number(req.query.offset) : undefined;
-
+    const userId = req.user!.id; // User is guaranteed by authenticate middleware
+    
     const decks = await DeckService.listDecks({
-      onlyPublic,
-      ...(ownerId !== undefined ? { ownerId } : {}),
-      ...(limit !== undefined ? { limit } : {}),
-      ...(offset !== undefined ? { offset } : {}),
+      ownerId: userId,
     });
 
     res.json({
@@ -39,13 +30,17 @@ export class DeckController {
 
   /**
    * Gets a single deck by ID
+   * Only if it belongs to the authenticated user
    * 
    * @route GET /api/decks/:id
    * @param id: deck ID
+   * @requires authentication
    */
   static getDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const deck = await DeckService.getDeckById(id);
+    const userId = req.user!.id;
+    
+    const deck = await DeckService.getDeckById(id, userId);
 
     res.json({
       status: 'success',
@@ -54,13 +49,22 @@ export class DeckController {
   });
 
   /**
-   * Creates a new deck
+   * Creates a new deck for the authenticated user
    * 
    * @route POST /api/decks
    * @body CreateDeckDTO: deck data
+   * @requires authentication
    */
   static createDeck = asyncHandler(async (req: Request, res: Response) => {
-    const deck = await DeckService.createDeck(req.body);
+    const userId = req.user!.id;
+    
+    // Override ownerId with authenticated user's ID
+    const deckData = {
+      ...req.body,
+      ownerId: userId
+    };
+    
+    const deck = await DeckService.createDeck(deckData);
 
     res.status(HTTP_STATUS.CREATED).json({
       status: 'success',
@@ -70,14 +74,18 @@ export class DeckController {
 
   /**
    * Updates an existing deck
+   * Only if it belongs to the authenticated user
    * 
    * @route PUT /api/decks/:id
    * @param id: deck ID to update
    * @body UpdateDeckDTO: fields to update
+   * @requires authentication
    */
   static updateDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const deck = await DeckService.updateDeck(id, req.body);
+    const userId = req.user!.id;
+    
+    const deck = await DeckService.updateDeck(id, req.body, userId);
 
     res.json({
       status: 'success',
@@ -87,13 +95,17 @@ export class DeckController {
 
   /**
    * Deletes a deck
+   * Only if it belongs to the authenticated user
    * 
    * @route DELETE /api/decks/:id
    * @param id: deck ID to delete
+   * @requires authentication
    */
   static deleteDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    await DeckService.deleteDeck(id);
+    const userId = req.user!.id;
+    
+    await DeckService.deleteDeck(id, userId);
 
     res.status(HTTP_STATUS.NO_CONTENT).send();
   });
@@ -103,6 +115,7 @@ export class DeckController {
    * 
    * @route POST /api/decks/:id/like
    * @param id: deck ID to like
+   * @requires authentication
    */
   static likeDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);

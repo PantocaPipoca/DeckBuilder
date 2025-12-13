@@ -15,7 +15,7 @@ const api = axios.create({
   },
 });
 
-//FUTURO PARA LOGIC JWT
+// JWT Logic - Automatically attach token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -42,11 +42,11 @@ export const getCardById = async (id: number): Promise<Card> => {
 };
 
 /**
- * @param userId ID of the user whose decks to fetch
+ * Get decks for the authenticated user
  * @returns Array of decks of the user
  */
-export const getUserDecks = async (userId: number): Promise<Deck[]> => {
-  const response = await api.get(`/decks?ownerId=${userId}`);
+export const getUserDecks = async (): Promise<Deck[]> => {
+  const response = await api.get(`/decks`);
   return response.data.data;
 };
 
@@ -60,7 +60,7 @@ export const getDeckById = async (id: number): Promise<Deck> => {
 };
 
 /**
- * @param data Deck creation data (name, description, cardNames, slot, isPublic, ownerId)
+ * @param data Deck creation data (name, description, cardNames, slot, isPublic)
  * @returns Created deck
  */
 export const createDeck = async (data: {
@@ -69,7 +69,6 @@ export const createDeck = async (data: {
   cardNames: string[];
   slot: number;
   isPublic: boolean;
-  ownerId: number;
 }): Promise<Deck> => {
   const response = await api.post('/decks', data);
   return response.data.data;
@@ -109,16 +108,32 @@ export const likeDeck = async (id: number): Promise<number> => {
   return response.data.data.likes;
 };
 
-//FUTURO JWT
+// Auth Functions
 
+/**
+ * Login user
+ */
 export const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
   const response = await api.post('/auth/login', { email, password });
   return response.data.data;
 };
 
+/**
+ * Register new user
+ */
 export const register = async (name: string, email: string, password: string): Promise<{ user: User; token: string }> => {
   const response = await api.post('/auth/register', { name, email, password });
   return response.data.data;
+};
+
+/**
+ * Get current user info
+ */
+export const getCurrentUser = async (token: string): Promise<User> => {
+  const response = await api.get('/auth/me', {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data.data.user;
 };
 
 export const saveToken = (token: string): void => {
