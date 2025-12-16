@@ -1,0 +1,233 @@
+/* client/src/styles/DeckCard.module.css */
+
+.deckCard {
+  background: rgba(26, 47, 77, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  border: 3px solid rgba(74, 123, 181, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.deckCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  border-color: rgba(74, 123, 181, 0.8);
+}
+
+.deckHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.deckInfo {
+  flex: 1;
+}
+
+.deckName {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffd700;
+  margin: 0;
+  margin-bottom: 4px;
+  text-shadow: 
+    1px 1px 0 #1a1d29,
+    -1px -1px 0 #1a1d29,
+    1px -1px 0 #1a1d29,
+    -1px 1px 0 #1a1d29;
+}
+
+.deckOwner {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-weight: 600;
+}
+
+.avgElixir {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.elixirIcon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.deckDescription {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  margin-bottom: 16px;
+  line-height: 1.4;
+  min-height: 40px;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(30, 58, 95, 0.4);
+  border-radius: 12px;
+  border: 2px solid rgba(74, 123, 181, 0.3);
+}
+
+.cardWrapper {
+  position: relative;
+  aspect-ratio: 0.75;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 2px var(--rarity-color, #94A3B8);
+}
+
+.cardWrapper:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 0 0 2px var(--rarity-color, #94A3B8),
+    0 0 15px var(--rarity-color, #94A3B8);
+  z-index: 10;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardElixir {
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-shadow: 
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+}
+
+.cardElixirIcon {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  z-index: 1;
+}
+
+.cardElixir span {
+  position: relative;
+  z-index: 2;
+}
+
+.deckFooter {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.likeButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 58, 95, 0.5);
+  border: 2px solid rgba(74, 123, 181, 0.5);
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.likeButton:not(:disabled):hover {
+  background: rgba(40, 78, 115, 0.7);
+  border-color: rgba(74, 123, 181, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.likeButton:active {
+  transform: translateY(0);
+}
+
+.likeButton.liked {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: #ef4444;
+  cursor: default;
+}
+
+.likeButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.likeIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.likeCount {
+  min-width: 20px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .deckCard {
+    padding: 15px;
+  }
+
+  .deckName {
+    font-size: 18px;
+  }
+
+  .deckDescription {
+    font-size: 13px;
+    min-height: 36px;
+  }
+
+  .cardsGrid {
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .avgElixir {
+    font-size: 16px;
+    padding: 5px 10px;
+  }
+
+  .elixirIcon {
+    width: 20px;
+    height: 20px;
+  }
+}

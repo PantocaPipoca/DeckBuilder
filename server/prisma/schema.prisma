@@ -21,6 +21,7 @@ model User {
   name      String
   decks     Deck[]   @relation("UserDecks")
   createdAt DateTime @default(now())
+  deckLikes   DeckLike[]
 }
 
 model Card {
@@ -52,6 +53,7 @@ model Deck {
   cards       DeckCard[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  deckLikes   DeckLike[]
 
   @@unique([ownerId, slot])
   @@index([isPublic])
@@ -70,6 +72,19 @@ model DeckCard {
   @@unique([deckId, cardId])
   @@unique([deckId, position])
   @@index([deckId])
+}
+
+model DeckLike {
+  id        Int      @id @default(autoincrement())
+  deckId    Int
+  deck      Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([deckId, userId])
+  @@index([deckId])
+  @@index([userId])
 }
 
 enum Rarity {

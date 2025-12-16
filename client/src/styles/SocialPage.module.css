@@ -1,0 +1,188 @@
+/* client/src/styles/SocialPage.module.css */
+
+.page {
+  min-height: 100vh;
+  background-image: url('/src/assets/cr-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  padding: 15px;
+  padding-bottom: 90px;
+}
+
+/* Container igual ao deckBuilder */
+.socialContainer {
+  margin: 0 auto 30px;
+  max-width: 500px;
+  background: transparent;
+  border-radius: 20px;
+  border: none;
+  padding: 0;
+  box-shadow: 
+    0 0 0 40px rgba(0, 0, 0, 0.05),
+    0 0 0 80px rgba(0, 0, 0, 0.05),
+    0 0 0 120px rgba(0, 0, 0, 0.05),
+    0 0 0 140px rgba(0, 0, 0, 0.05),
+    0 0 0 9999px rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Title bar - estilo dos deck slots */
+.titleBar {
+  width: calc(100% + 4px);
+  background: #5b9ff5;
+  padding: 16px 0;
+  margin-left: -2px;
+  margin-right: -2px;
+  text-align: center;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 900;
+  color: white;
+  margin: 0;
+  text-shadow: 
+    2px 2px 0 #1a1d29,
+    -1px -1px 0 #1a1d29,
+    1px -1px 0 #1a1d29,
+    -1px 1px 0 #1a1d29;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Content area - estilo da deckSection */
+.content {
+  width: calc(100% + 4px);
+  background: rgba(70, 120, 180, 0.5);
+  margin-left: -2px;
+  margin-right: -2px;
+  margin-bottom: -2px;
+  border-top: 4px solid rgba(100, 150, 220, 0.8);
+  padding: 20px 15px;
+  min-height: calc(100vh - 200px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.deckGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.errorContainer {
+  gap: 20px;
+}
+
+.retryButton {
+  padding: 12px 32px;
+  background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
+  border: 3px solid #60a5fa;
+  border-radius: 12px;
+  color: white;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #1e3a5f,
+    0 6px 12px rgba(74, 123, 181, 0.4);
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 #1e3a5f,
+    0 8px 16px rgba(74, 123, 181, 0.6);
+}
+
+.retryButton:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #1e3a5f,
+    0 4px 8px rgba(74, 123, 181, 0.4);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: white;
+  gap: 12px;
+}
+
+.emptyIcon {
+  font-size: 60px;
+  opacity: 0.6;
+}
+
+.emptyState h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.emptyState p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 10px;
+    padding-bottom: 80px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .content {
+    padding: 15px 12px;
+  }
+
+  .deckGrid {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .content {
+    padding: 12px 10px;
+  }
+}

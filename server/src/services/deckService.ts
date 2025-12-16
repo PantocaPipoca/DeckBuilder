@@ -285,11 +285,37 @@ export class DeckService {
   }
 
   /**
-   * Increments like count
+   * Increments like count (prevents duplicate likes from same user)
    */
-  static async likeDeck(id: number) {
-    await this.getDeckById(id);
+  static async likeDeck(id: number, userId: number) {
+    await this.getSharedDeck(id); // Verifica se deck existe e é público
 
+    // Check if user already liked this deck
+    const existingLike = await prisma.deckLike.findUnique({
+      where: {
+        deckId_userId: {
+          deckId: id,
+          userId: userId,
+        }
+      }
+    });
+
+    if (existingLike) {
+      throw { 
+        statusCode: HTTP_STATUS.BAD_REQUEST, 
+        message: 'You already liked this deck' 
+      };
+    }
+
+    // Create like record
+    await prisma.deckLike.create({
+      data: {
+        deckId: id,
+        userId: userId,
+      }
+    });
+
+    // Increment like count
     const deck = await prisma.deck.update({
       where: { id },
       data: { likes: { increment: 1 } },
@@ -316,5 +342,38 @@ export class DeckService {
       totalCards,
       avgDeckElixir: Math.round((avgDeckElixir._avg.avgElixir || 0) * 10) / 10,
     };
+  }
+
+  /**
+   * Gets a shared deck (public decks only)
+   * 
+   * @param id: deck ID
+   * @returns deck with full card details
+   * @throws error 404 if deck not found or is private
+   */
+  static async getSharedDeck(id: number) {
+    const deck = await prisma.deck.findUnique({
+      where: { id },
+      include: {
+        cards: {
+          include: { card: true },
+          orderBy: { position: 'asc' },
+        },
+        owner: {
+          select: { id: true, name: true },
+        },
+      },
+    });
+
+    if (!deck) {
+      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck not found' };
+    }
+
+    // Only allow access to public decks
+    if (!deck.isPublic) {
+      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck is private' };
+    }
+
+    return deck;
   }
 }

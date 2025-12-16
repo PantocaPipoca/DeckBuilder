@@ -7,8 +7,7 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-
-  // AppError (duck typing - verifica propriedades)
+  // Erros personalizados lançados na aplicação
   if (err.statusCode && err.message) {
     return res.status(err.statusCode).json({
       status: 'error',

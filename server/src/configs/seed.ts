@@ -1,4 +1,4 @@
-
+import bcrypt from 'bcryptjs';
 import prisma from './database';
 import { Rarity, CardType } from '@prisma/client';
 
@@ -112,20 +112,16 @@ const cards = [
 
 async function main() {
 
-  // Test user
-  const user = await prisma.user.upsert({
-    where: { email: 'test@example.com' },
+  const hashedPassword = await bcrypt.hash('devdev', 10);
+  await prisma.user.upsert({
+    where: { email: 'dev@dev.com' },
     update: {},
     create: {
-      email: 'test@example.com',
-      password: 'password123',
-      name: 'Test User',
+      email: 'dev@dev.com',
+      password: hashedPassword,
+      name: 'dev',
     },
   });
-
-  // Clear existing data
-  await prisma.deckCard.deleteMany();
-  await prisma.deck.deleteMany();
   await prisma.card.deleteMany();
   
   for (const card of cards) {

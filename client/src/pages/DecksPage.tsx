@@ -1,16 +1,19 @@
 // src/pages/DecksPage.tsx
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAllCards, getUserDecks, createDeck, updateDeck, deleteDeck } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import Header from '../components/Header';
+import NavBar from '../components/NavBar';
 import Card from '../components/Card';
 import FilterBar from '../components/FilterBar';
 import CardPopup from '../components/CardPopup';
 import styles from '../styles/DecksPage.module.css';
 import type { Card as CardType, SortBy, SortOrder, Rarity } from '../types';
+import ShareDeckPopup from '../components/ShareDeckPopup';
 
 function DecksPage() {
-  const { user } = useAuth();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   
   // Estados
   const [allCards, setAllCards] = useState<CardType[]>([]);
@@ -23,10 +26,10 @@ function DecksPage() {
   const [order, setOrder] = useState<SortOrder>('desc');
   const [popupCard, setPopupCard] = useState<CardType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [showSharePopup, setShowSharePopup] = useState(false);
 
   const deckBuilderRef = useRef<HTMLDivElement>(null);
 
-  // Load cards and user's saved decks on mount
   useEffect(() => {
     loadAllData();
   }, []);
@@ -37,16 +40,13 @@ function DecksPage() {
       const cards = await getAllCards();
       setAllCards(cards || []);
 
-      // Load user's existing decks
       const userDecks = await getUserDecks();
       
       const newDecks: CardType[][] = [[], [], [], [], []];
       const newDeckIds: (number | null)[] = [null, null, null, null, null];
 
-      // Map backend decks to slots using their slot field
       userDecks.forEach((deck: any) => {
         if (deck.slot >= 0 && deck.slot < 5) {
-          // Extract cards from deck.cards array and find full card data
           const deckCards = deck.cards
             .sort((a: any, b: any) => a.position - b.position)
             .map((dc: any) => {
@@ -69,7 +69,6 @@ function DecksPage() {
     }
   }
 
-  // Save or update deck when it has exactly 8 cards
   async function saveDeckIfComplete(deckIndex: number, cards: CardType[]) {
     if (cards.length !== 8) return;
 
@@ -84,10 +83,8 @@ function DecksPage() {
       };
 
       if (deckIds[deckIndex]) {
-        // Update existing deck
         await updateDeck(deckIds[deckIndex]!, deckData);
       } else {
-        // Create new deck
         const newDeck = await createDeck(deckData);
         const newDeckIds = [...deckIds];
         newDeckIds[deckIndex] = newDeck.id;
@@ -99,7 +96,6 @@ function DecksPage() {
     }
   }
 
-  // Sorted cards
   const sortedCards = [...allCards].sort((a, b) => {
     let comparison = 0;
     if (sortBy === 'name') comparison = a.name.localeCompare(b.name);
@@ -111,7 +107,6 @@ function DecksPage() {
     return order === 'asc' ? comparison : -comparison;
   });
 
-  // Handlers
   function handleCollectionCardClick(card: CardType) {
     setCardAsSelected(card);
     setIsReplaceMode(false);
@@ -130,7 +125,6 @@ function DecksPage() {
     setDecks(newDecks);
     setCardAsSelected(null);
 
-    // Auto-save when deck reaches 8 cards
     if (updatedDeck.length === 8) {
       await saveDeckIfComplete(activeDeckIndex, updatedDeck);
     }
@@ -146,7 +140,6 @@ function DecksPage() {
     setCardAsSelected(null);
     setIsReplaceMode(false);
 
-    // Auto-save after replacement (deck is still 8 cards)
     await saveDeckIfComplete(activeDeckIndex, newDeck);
   }
 
@@ -157,7 +150,6 @@ function DecksPage() {
     newDecks[activeDeckIndex] = newDeck;
     setDecks(newDecks);
     setCardAsSelected(null);
-    // Don't save incomplete decks
   }
 
   async function handleClearDeck() {
@@ -167,7 +159,6 @@ function DecksPage() {
     newDecks[activeDeckIndex] = [];
     setDecks(newDecks);
 
-    // Delete from backend if it exists
     if (deckIds[activeDeckIndex]) {
       try {
         await deleteDeck(deckIds[activeDeckIndex]!);
@@ -186,6 +177,11 @@ function DecksPage() {
     setIsReplaceMode(false);
   }
 
+  function handleLogout() {
+    logout();
+    navigate('/login');
+  }
+
   const currentDeck = decks[activeDeckIndex];
   const cardIdsInDeck = currentDeck.map(c => c.id);
 
@@ -193,154 +189,174 @@ function DecksPage() {
     ? (currentDeck.reduce((s, c) => s + c.elixir, 0) / currentDeck.length).toFixed(1)
     : '0.0';
 
-  // Loading state
   if (loading) {
     return (
-      <>
-        <Header />
-        <div className={styles.page}>
-          <div className={styles.loadingContainer}>
-            Loading decks...
-          </div>
+      <div className={styles.page}>
+        <div className={styles.loadingContainer}>
+          Loading decks...
         </div>
-      </>
+      </div>
     );
   }
+
   return (
-    <>
-      <Header />
-      <div className={styles.page}>
-        <div className={styles.deckBuilder}>
-          {/* Deck slots */}
-          <div className={styles.deckSlots}>
-            {[0, 1, 2, 3, 4].map(index => (
+    <div className={styles.page}>
+      <div className={styles.deckBuilder}>
+        <div className={styles.deckSlots}>
+          {[0, 1, 2, 3, 4].map(index => (
+            <button
+              key={index}
+              className={`${styles.deckSlot} ${index === activeDeckIndex ? styles.active : ''}`}
+              onClick={() => switchDeck(index)}
+            >
+              {index + 1}
+            </button>
+          ))}
+        </div>
+
+        <div ref={deckBuilderRef} className={styles.deckSection}>
+          <div className={styles.deckHeader}>
+            <h2>
+              Your Deck ({currentDeck.length}/8)
+            </h2>
+            {currentDeck.length > 0 && (
               <button
-                key={index}
-                className={`${styles.deckSlot} ${index === activeDeckIndex ? styles.active : ''}`}
-                onClick={() => switchDeck(index)}
+                onClick={handleClearDeck}
+                className={styles.clearButton}
               >
-                {index + 1}
+                CLEAR DECK
               </button>
+            )}
+          </div>
+          <div className={styles.deckGrid}>
+            {currentDeck.map(card => (
+              <div key={card.id} className={isReplaceMode ? styles.shaking : ''}>
+                <Card
+                  card={card}
+                  isSelected={false}
+                  showButtons={selectedCard?.id === card.id && !isReplaceMode}
+                  onClick={() => {
+                    if (isReplaceMode) handleDeckCardClick(card);
+                    else setCardAsSelected(card);
+                  }}
+                  onInfo={() => setPopupCard(card)}
+                  onRemove={() => handleRemoveCard(card)}
+                />
+              </div>
+            ))}
+
+            {Array(8 - currentDeck.length).fill(0).map((_, i) => (
+              <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
             ))}
           </div>
-
-          {/* Deck Builder */}
-          <div ref={deckBuilderRef} className={styles.deckSection}>
-            <div className={styles.deckHeader}>
-              <h2>
-                Your Deck ({currentDeck.length}/8)
-              </h2>
-              {currentDeck.length > 0 && (
-                <button
-                  onClick={handleClearDeck}
-                  className={styles.clearButton}
-                >
-                  CLEAR DECK
-                </button>
-              )}
-            </div>
-            <div className={styles.deckGrid}>
-              {currentDeck.map(card => (
-                <div key={card.id} className={isReplaceMode ? styles.shaking : ''}>
-                  <Card
-                    card={card}
-                    isSelected={false}
-                    showButtons={selectedCard?.id === card.id && !isReplaceMode}
-                    onClick={() => {
-                      if (isReplaceMode) handleDeckCardClick(card);
-                      else setCardAsSelected(card);
-                    }}
-                    onInfo={() => setPopupCard(card)}
-                    onRemove={() => handleRemoveCard(card)}
-                  />
-                </div>
-              ))}
-
-              {Array(8 - currentDeck.length).fill(0).map((_, i) => (
-                <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
-              ))}
-            </div>
-            
+          
+          <div className={styles.statsBar}>
             <div className={styles.avgElixir}>
               <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirIcon} />
               <span>{avgElixir}</span>
             </div>
+            
+            <button 
+              onClick={() => setShowSharePopup(true)} 
+              className={styles.shareButton}
+              title="Share Deck"
+              disabled={currentDeck.length !== 8}
+            >
+              🔗
+            </button>
+            
+            <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
+              🚪
+            </button>
           </div>
-
-          {/* Replace Mode */}
-          {isReplaceMode && selectedCard && (
-            <div className={styles.replacePrompt} style={{ marginTop: 12 }}>
-              <p>Click on a card in your deck to replace it</p>
-              <Card
-                card={selectedCard}
-                isSelected={true}
-                showButtons={false}
-                onClick={() => {}}
-              />
-              <button
-                className={styles.cancelButton}
-                onClick={() => {
-                  setIsReplaceMode(false);
-                  setCardAsSelected(null);
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-
-          {/* Card Collection */}
-          <div className={`${styles.collection} ${isReplaceMode ? styles.hidden : ''}`}>
-            <div className={styles.separator}></div>
-
-            <div className={styles.filterWrapper}>
-              <h2 className={styles.collectionTitle}>Card Collection</h2>
-              <FilterBar
-                sortBy={sortBy}
-                order={order}
-                onSortChange={(s) => setSortBy(s)}
-                onOrderChange={(o) => setOrder(o)}
-              />
-            </div>
-
-            {/* Cards grid */}
-            <div className={styles.cardGrid}>
-              {sortedCards.length === 0 ? (
-                <div className={styles.cardLoading}>
-                  Loading cards...
-                </div>
-              ) : (
-                sortedCards.map(card => {
-                  const inDeck = cardIdsInDeck.includes(card.id);
-                  const isSelected = selectedCard?.id === card.id;
-
-                  return (
-                    <div key={card.id} className={inDeck ? styles.cardInDeck : ''}>
-                      <Card
-                        card={card}
-                        isSelected={isSelected}
-                        showButtons={isSelected && !inDeck}
-                        onClick={() => !inDeck && handleCollectionCardClick(card)}
-                        onInfo={() => setPopupCard(card)}
-                        onUse={() => handleUseCard(card)}
-                      />
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Popup of Info */}
-          {popupCard && (
-            <CardPopup
-              card={popupCard}
-              onClose={() => setPopupCard(null)}
-            />
-          )}
         </div>
+
+        {isReplaceMode && selectedCard && (
+          <div className={styles.replacePrompt} style={{ marginTop: 12 }}>
+            <p>Click on a card in your deck to replace it</p>
+            <Card
+              card={selectedCard}
+              isSelected={true}
+              showButtons={false}
+              onClick={() => {}}
+            />
+            <button
+              className={styles.cancelButton}
+              onClick={() => {
+                setIsReplaceMode(false);
+                setCardAsSelected(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+
+        <div className={`${styles.collection} ${isReplaceMode ? styles.hidden : ''}`}>
+          <div className={styles.separator}></div>
+
+          <div className={styles.filterWrapper}>
+            <h2 className={styles.collectionTitle}>Card Collection</h2>
+            <FilterBar
+              sortBy={sortBy}
+              order={order}
+              onSortChange={(s) => setSortBy(s)}
+              onOrderChange={(o) => setOrder(o)}
+            />
+          </div>
+
+          <div className={styles.cardGrid}>
+            {sortedCards.length === 0 ? (
+              <div className={styles.cardLoading}>
+                Loading cards...
+              </div>
+            ) : (
+              sortedCards.map(card => {
+                const inDeck = cardIdsInDeck.includes(card.id);
+                const isSelected = selectedCard?.id === card.id;
+
+                return (
+                  <div key={card.id} className={inDeck ? styles.cardInDeck : ''}>
+                    <Card
+                      card={card}
+                      isSelected={isSelected}
+                      showButtons={isSelected && !inDeck}
+                      onClick={() => !inDeck && handleCollectionCardClick(card)}
+                      onInfo={() => setPopupCard(card)}
+                      onUse={() => handleUseCard(card)}
+                    />
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {popupCard && (
+          <CardPopup
+            card={popupCard}
+            onClose={() => setPopupCard(null)}
+          />
+        )}
+        {showSharePopup && currentDeck.length === 8 && (
+          <ShareDeckPopup
+            deck={currentDeck}
+            deckId={deckIds[activeDeckIndex]}
+            deckSlot={activeDeckIndex}
+            onClose={() => setShowSharePopup(false)}
+            onUpdate={(updatedDeck) => {
+              const newDeckIds = [...deckIds];
+              if (updatedDeck.id) {
+                newDeckIds[activeDeckIndex] = updatedDeck.id;
+                setDeckIds(newDeckIds);
+              }
+            }}
+          />
+        )}
+        
+        <NavBar />
       </div>
-    </>
+    </div>
   );
 }
 

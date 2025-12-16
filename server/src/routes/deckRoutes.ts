@@ -1,18 +1,18 @@
-// src/routes/deckRoutes.ts
+// server/src/routes/deckRoutes.ts
 import { Router } from 'express';
 import { DeckController } from '../controllers/deckController';
-import { authenticate } from '../middleware/auth';
+import { authenticate, optionalAuth } from '../middleware/auth';
 
-/**
- * Defines all routes related to deck operations
- */
 const router = Router();
 
 // Public routes
 router.get('/stats', DeckController.getStats);
+router.get('/shared/:id', DeckController.getSharedDeck); // ADICIONAR ESTA LINHA
 
-// Require authentication
-router.get('/', authenticate, DeckController.listDecks);
+// Routes with optional auth (for public decks)
+router.get('/', optionalAuth, DeckController.listDecks);
+
+// Protected routes - require authentication
 router.post('/', authenticate, DeckController.createDeck);
 router.get('/:id', authenticate, DeckController.getDeck);
 router.put('/:id', authenticate, DeckController.updateDeck);

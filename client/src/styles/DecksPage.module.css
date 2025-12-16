@@ -8,7 +8,6 @@
   background-attachment: fixed;
   color: white;
   padding: 15px;
-  padding-bottom: 20px;
 }
 
 .deckSlots {
@@ -60,11 +59,12 @@
 
 .deckBuilder {
   margin: 0 auto 30px;
-  max-width: 560px;
+  max-width: 500px;
   background: transparent;
   border-radius: 20px;
   border: none;
   padding: 0;
+  padding-bottom: 90px; /* Espaço para navbar fixa */
   box-shadow: 
     0 0 0 40px rgba(0, 0, 0, 0.05),
     0 0 0 80px rgba(0, 0, 0, 0.05),
@@ -103,24 +103,6 @@
   color: white;
   font-weight: 700;
   margin: 0;
-}
-
-.avgElixir {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 24px;
-  font-weight: 700;
-  color: white;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 8px;
-  border-radius: 12px;
-  margin-left: 15px;
-  margin-bottom: 15px;
-  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
-  width: fit-content;
 }
 
 .elixirIcon {
@@ -337,4 +319,102 @@
     height: 50px;
     font-size: 22px;
   }
+}
+
+.statsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 15px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  gap: 12px;
+}
+
+.avgElixir {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 8px;
+  border-radius: 12px;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.logoutButton {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 3px solid #f87171;
+  border-radius: 12px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #b91c1c,
+    0 6px 12px rgba(239, 68, 68, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoutButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 #b91c1c,
+    0 8px 16px rgba(239, 68, 68, 0.6);
+}
+
+.logoutButton:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #b91c1c,
+    0 4px 8px rgba(239, 68, 68, 0.4);
+}
+
+.shareButton {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 3px solid #34d399;
+  border-radius: 12px;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 
+    0 4px 0 #047857,
+    0 6px 12px rgba(16, 185, 129, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.shareButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 #047857,
+    0 8px 16px rgba(16, 185, 129, 0.6);
+}
+
+.shareButton:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 #047857,
+    0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+.shareButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  border-color: #9ca3af;
 }

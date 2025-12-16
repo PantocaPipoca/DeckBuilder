@@ -152,4 +152,23 @@ export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
 
+/**
+ * Get all public decks
+ * @returns Array of public decks
+ */
+export const getPublicDecks = async (): Promise<any[]> => {
+  const response = await api.get('/decks?onlyPublic=true');
+  return response.data.data;
+};
+
+/**
+ * Get a shared deck by ID (public or with valid link)
+ * @param deckId ID of the deck
+ * @returns Deck data
+ */
+export const getSharedDeck = async (deckId: number): Promise<any> => {
+  const response = await api.get(`/decks/shared/${deckId}`);
+  return response.data.data;
+};
+
 export default api;

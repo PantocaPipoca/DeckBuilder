@@ -1,0 +1,220 @@
+/* client/src/styles/SharedDeckPage.module.css */
+
+.page {
+  min-height: 100vh;
+  background-image: url('/src/assets/cr-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  max-width: 560px;
+  width: 100%;
+  background: rgba(26, 47, 77, 0.95);
+  border-radius: 20px;
+  border: 3px solid rgba(74, 123, 181, 0.5);
+  padding: 25px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 15px;
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 60px;
+}
+
+.errorContainer h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.errorContainer p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(74, 123, 181, 0.3);
+  gap: 15px;
+}
+
+.deckInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.deckName {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffd700;
+  margin: 0;
+  margin-bottom: 6px;
+  text-shadow: 
+    2px 2px 0 #1a1d29,
+    -1px -1px 0 #1a1d29;
+  text-transform: uppercase;
+  word-wrap: break-word;
+}
+
+.ownerInfo {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.ownerInfo strong {
+  color: white;
+  font-weight: 700;
+}
+
+.avgElixir {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.elixirIcon {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+.description {
+  background: rgba(30, 58, 95, 0.5);
+  border: 2px solid rgba(74, 123, 181, 0.3);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.description p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.deckSection {
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.deckGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: rgba(30, 58, 95, 0.4);
+  border-radius: 12px;
+  border: 2px solid rgba(74, 123, 181, 0.3);
+}
+
+.stats {
+  display: flex;
+  gap: 15px;
+  padding: 12px 15px;
+  background: rgba(30, 58, 95, 0.3);
+  border-radius: 12px;
+  border: 2px solid rgba(74, 123, 181, 0.3);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 15px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .deckName {
+    font-size: 20px;
+  }
+
+  .deckGrid {
+    gap: 6px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  .deckName {
+    font-size: 18px;
+  }
+
+  .ownerInfo {
+    font-size: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .avgElixir {
+    align-self: flex-end;
+  }
+}

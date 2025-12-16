@@ -5,17 +5,41 @@ import { HTTP_STATUS } from '../configs/constants';
 
 /**
  * Controller for deck operations
- * Now uses authenticated user from request
  */
 export class DeckController {
-  /**
-   * Lists all decks for the authenticated user
+/**
+   * Lists all decks with optional filtering
+   * If user is authenticated, shows their decks
+   * If onlyPublic=true, shows all public decks (no auth required)
    * 
    * @route GET /api/decks
-   * @requires authentication
+   * @query onlyPublic: filter for public decks only
    */
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user!.id; // User is guaranteed by authenticate middleware
+    const onlyPublic = req.query.onlyPublic === 'true';
+    
+    // If requesting public decks, allow without auth
+    if (onlyPublic) {
+      const decks = await DeckService.listDecks({
+        onlyPublic: true,
+      });
+
+      return res.json({
+        status: 'success',
+        results: decks.length,
+        data: decks,
+      });
+    }
+
+    // Otherwise, require authentication and show user's decks
+    if (!req.user) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        status: 'error',
+        message: 'Authentication required'
+      });
+    }
+
+    const userId = req.user.id;
     
     const decks = await DeckService.listDecks({
       ownerId: userId,
@@ -119,7 +143,9 @@ export class DeckController {
    */
   static likeDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
-    const likes = await DeckService.likeDeck(id);
+    const userId = req.user!.id;
+    
+    const likes = await DeckService.likeDeck(id, userId);
 
     res.json({
       status: 'success',
@@ -139,6 +165,22 @@ export class DeckController {
     res.json({
       status: 'success',
       data: stats,
+    });
+  });
+
+  /**
+   * Gets a shared deck (public only)
+   * 
+   * @route GET /api/decks/shared/:id
+   * @param id: deck ID
+   */
+  static getSharedDeck = asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const deck = await DeckService.getSharedDeck(id);
+
+    res.json({
+      status: 'success',
+      data: deck,
     });
   });
 }

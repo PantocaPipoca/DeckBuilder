@@ -26,7 +26,6 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({
     message: 'DeckBuilder API',
-    version: '1.0.0',
     endpoints: {
       health: '/health',
       api: '/api/decks'

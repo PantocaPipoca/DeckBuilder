@@ -2,20 +2,10 @@ import prisma from '../configs/database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { HTTP_STATUS } from '../configs/constants';
+import { RegisterDTO, LoginDTO } from '../types/auth.types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'qPreguicaMeu';
 const JWT_EXPIRES_IN = '7d';
-
-export interface RegisterDTO {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginDTO {
-  email: string;
-  password: string;
-}
 
 /**
  * Service for handling user authentication
