@@ -1,4 +1,4 @@
-// src/pages/DecksPage.tsx
+// client/src/pages/DecksPage.tsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAllCards, getUserDecks, createDeck, updateDeck, deleteDeck } from '../services/api';
@@ -7,158 +7,234 @@ import NavBar from '../components/NavBar';
 import Card from '../components/Card';
 import FilterBar from '../components/FilterBar';
 import CardPopup from '../components/CardPopup';
-import styles from '../styles/DecksPage.module.css';
-import type { Card as CardType, SortBy, SortOrder, Rarity } from '../types';
 import ShareDeckPopup from '../components/ShareDeckPopup';
+import styles from '../styles/DecksPage.module.css';
+import type { Card as CardType, SortBy, SortOrder } from '../types';
 
 function DecksPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   
-  // Estados
   const [allCards, setAllCards] = useState<CardType[]>([]);
   const [decks, setDecks] = useState<CardType[][]>([[], [], [], [], []]);
   const [deckIds, setDeckIds] = useState<(number | null)[]>([null, null, null, null, null]);
-  const [activeDeckIndex, setActiveDeckIndex] = useState<number>(0);
-  const [selectedCard, setCardAsSelected] = useState<CardType | null>(null);
-  const [isReplaceMode, setIsReplaceMode] = useState<boolean>(false);
+  const [activeDeckIndex, setActiveDeckIndex] = useState(0);
+  const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
+  const [isReplaceMode, setIsReplaceMode] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>('rarity');
   const [order, setOrder] = useState<SortOrder>('desc');
   const [popupCard, setPopupCard] = useState<CardType | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [showSharePopup, setShowSharePopup] = useState(false);
 
   const deckBuilderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadAllData();
+    loadData();
   }, []);
 
-  async function loadAllData() {
+  // Load cards and user's saved decks
+  async function loadData() {
     try {
       setLoading(true);
+      
+      // Get all cards first
       const cards = await getAllCards();
       setAllCards(cards || []);
 
+      // Get user's decks
       const userDecks = await getUserDecks();
       
+      // Create empty deck slots
       const newDecks: CardType[][] = [[], [], [], [], []];
       const newDeckIds: (number | null)[] = [null, null, null, null, null];
 
-      userDecks.forEach((deck: any) => {
+      // Fill in the saved decks
+      for (let i = 0; i < userDecks.length; i++) {
+        const deck = userDecks[i];
+        
         if (deck.slot >= 0 && deck.slot < 5) {
-          const deckCards = deck.cards
-            .sort((a: any, b: any) => a.position - b.position)
-            .map((dc: any) => {
-              const fullCard = cards.find((c: CardType) => c.name === dc.card.name);
-              return fullCard;
-            })
-            .filter(Boolean) as CardType[];
+          // Sort cards by position
+          const sortedCards = [...deck.cards];
+          sortedCards.sort((a: any, b: any) => a.position - b.position);
+          
+          // Get full card data
+          const deckCards: CardType[] = [];
+          for (const dc of sortedCards) {
+            const card = cards.find((c: CardType) => c.name === dc.card.name);
+            if (card) {
+              deckCards.push(card);
+            }
+          }
           
           newDecks[deck.slot] = deckCards;
           newDeckIds[deck.slot] = deck.id;
         }
-      });
+      }
 
       setDecks(newDecks);
       setDeckIds(newDeckIds);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading:', error);
     } finally {
       setLoading(false);
     }
   }
 
-  async function saveDeckIfComplete(deckIndex: number, cards: CardType[]) {
+  // Save deck to server when it's complete (8 cards)
+  async function saveDeck(deckIndex: number, cards: CardType[]) {
     if (cards.length !== 8) return;
 
     try {
-      const cardNames = cards.map(c => c.name);
+      // Get card names
+      const cardNames: string[] = [];
+      for (const card of cards) {
+        cardNames.push(card.name);
+      }
+
       const deckData = {
         name: `Deck ${deckIndex + 1}`,
-        description: `Auto-saved deck slot ${deckIndex + 1}`,
-        cardNames,
+        description: `Deck slot ${deckIndex + 1}`,
+        cardNames: cardNames,
         slot: deckIndex,
         isPublic: false,
       };
 
+      // Update or create
       if (deckIds[deckIndex]) {
         await updateDeck(deckIds[deckIndex]!, deckData);
       } else {
         const newDeck = await createDeck(deckData);
-        const newDeckIds = [...deckIds];
-        newDeckIds[deckIndex] = newDeck.id;
-        setDeckIds(newDeckIds);
+        const ids = [...deckIds];
+        ids[deckIndex] = newDeck.id;
+        setDeckIds(ids);
       }
-    } catch (error) {
-      console.error('Error saving deck:', error);
-      alert('Failed to save deck. Please try again.');
+    } catch (error: any) {
+      console.error('Save error:', error);
+      alert('Failed to save deck');
     }
   }
 
-  const sortedCards = [...allCards].sort((a, b) => {
-    let comparison = 0;
-    if (sortBy === 'name') comparison = a.name.localeCompare(b.name);
-    else if (sortBy === 'elixir') comparison = a.elixir - b.elixir;
-    else if (sortBy === 'rarity') {
-      const rarityOrder: Record<Rarity, number> = { COMMON: 0, RARE: 1, EPIC: 2, LEGENDARY: 3 };
-      comparison = rarityOrder[a.rarity] - rarityOrder[b.rarity];
-    }
-    return order === 'asc' ? comparison : -comparison;
-  });
+  // Sort cards based on current filters
+  function getSortedCards() {
+    const sorted = [...allCards];
+    
+    sorted.sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortBy === 'name') {
+        comparison = a.name.localeCompare(b.name);
+      } else if (sortBy === 'elixir') {
+        comparison = a.elixir - b.elixir;
+      } else if (sortBy === 'rarity') {
+        // COMMON=0, RARE=1, EPIC=2, LEGENDARY=3
+        const rarityValues: any = { 
+          COMMON: 0, 
+          RARE: 1, 
+          EPIC: 2, 
+          LEGENDARY: 3 
+        };
+        comparison = rarityValues[a.rarity] - rarityValues[b.rarity];
+      }
+      
+      if (order === 'desc') {
+        comparison = -comparison;
+      }
+      
+      return comparison;
+    });
+    
+    return sorted;
+  }
 
+  // Click on card in collection
   function handleCollectionCardClick(card: CardType) {
-    setCardAsSelected(card);
+    setSelectedCard(card);
     setIsReplaceMode(false);
   }
 
+  // Add card to deck
   async function handleUseCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
+    
+    // Check if deck is full
     if (currentDeck.length >= 8) {
+      // Enter replace mode
       setIsReplaceMode(true);
-      deckBuilderRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (deckBuilderRef.current) {
+        deckBuilderRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
       return;
     }
+    
+    // Add card
     const newDecks = [...decks];
     const updatedDeck = [...currentDeck, card];
     newDecks[activeDeckIndex] = updatedDeck;
     setDecks(newDecks);
-    setCardAsSelected(null);
+    setSelectedCard(null);
 
+    // Auto-save if complete
     if (updatedDeck.length === 8) {
-      await saveDeckIfComplete(activeDeckIndex, updatedDeck);
+      await saveDeck(activeDeckIndex, updatedDeck);
     }
   }
 
+  // Replace card in deck (when in replace mode)
   async function handleDeckCardClick(cardToReplace: CardType) {
     if (!isReplaceMode || !selectedCard) return;
+    
     const currentDeck = decks[activeDeckIndex];
-    const newDeck = currentDeck.map(c => (c.id === cardToReplace.id ? selectedCard : c));
+    
+    // Replace the card
+    const newDeck: CardType[] = [];
+    for (const card of currentDeck) {
+      if (card.id === cardToReplace.id) {
+        newDeck.push(selectedCard);
+      } else {
+        newDeck.push(card);
+      }
+    }
+    
     const newDecks = [...decks];
     newDecks[activeDeckIndex] = newDeck;
     setDecks(newDecks);
-    setCardAsSelected(null);
+    setSelectedCard(null);
     setIsReplaceMode(false);
 
-    await saveDeckIfComplete(activeDeckIndex, newDeck);
+    await saveDeck(activeDeckIndex, newDeck);
   }
 
+  // Remove card from deck
   function handleRemoveCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
-    const newDeck = currentDeck.filter(c => c.id !== card.id);
+    
+    // Filter out the card
+    const newDeck: CardType[] = [];
+    for (const c of currentDeck) {
+      if (c.id !== card.id) {
+        newDeck.push(c);
+      }
+    }
+    
     const newDecks = [...decks];
     newDecks[activeDeckIndex] = newDeck;
     setDecks(newDecks);
-    setCardAsSelected(null);
+    setSelectedCard(null);
   }
 
+  // Clear entire deck
   async function handleClearDeck() {
-    if (!window.confirm('Clear this deck? This will delete it from the server.')) return;
+    if (!window.confirm('Clear this deck?')) return;
 
     const newDecks = [...decks];
     newDecks[activeDeckIndex] = [];
     setDecks(newDecks);
 
+    // Delete from server if exists
     if (deckIds[activeDeckIndex]) {
       try {
         await deleteDeck(deckIds[activeDeckIndex]!);
@@ -166,14 +242,15 @@ function DecksPage() {
         newDeckIds[activeDeckIndex] = null;
         setDeckIds(newDeckIds);
       } catch (error) {
-        console.error('Error deleting deck:', error);
+        console.error('Delete error:', error);
       }
     }
   }
 
+  // Switch between deck slots
   function switchDeck(index: number) {
     setActiveDeckIndex(index);
-    setCardAsSelected(null);
+    setSelectedCard(null);
     setIsReplaceMode(false);
   }
 
@@ -183,51 +260,62 @@ function DecksPage() {
   }
 
   const currentDeck = decks[activeDeckIndex];
-  const cardIdsInDeck = currentDeck.map(c => c.id);
+  
+  // Get IDs of cards in current deck
+  const cardIdsInDeck: number[] = [];
+  for (const card of currentDeck) {
+    cardIdsInDeck.push(card.id);
+  }
 
-  const avgElixir = currentDeck.length > 0
-    ? (currentDeck.reduce((s, c) => s + c.elixir, 0) / currentDeck.length).toFixed(1)
-    : '0.0';
+  // Calculate average elixir cost
+  let avgElixir = '0.0';
+  if (currentDeck.length > 0) {
+    let total = 0;
+    for (const card of currentDeck) {
+      total += card.elixir;
+    }
+    const avg = total / currentDeck.length;
+    avgElixir = avg.toFixed(1);
+  }
 
   if (loading) {
     return (
       <div className={styles.page}>
-        <div className={styles.loadingContainer}>
-          Loading decks...
-        </div>
+        <div className={styles.loadingContainer}>Loading decks...</div>
       </div>
     );
   }
 
+  const sortedCards = getSortedCards();
+
   return (
     <div className={styles.page}>
       <div className={styles.deckBuilder}>
+        
+        {/* Deck slot buttons (1-5) */}
         <div className={styles.deckSlots}>
-          {[0, 1, 2, 3, 4].map(index => (
+          {[0, 1, 2, 3, 4].map(i => (
             <button
-              key={index}
-              className={`${styles.deckSlot} ${index === activeDeckIndex ? styles.active : ''}`}
-              onClick={() => switchDeck(index)}
+              key={i}
+              className={`${styles.deckSlot} ${i === activeDeckIndex ? styles.active : ''}`}
+              onClick={() => switchDeck(i)}
             >
-              {index + 1}
+              {i + 1}
             </button>
           ))}
         </div>
 
+        {/* Current deck area */}
         <div ref={deckBuilderRef} className={styles.deckSection}>
           <div className={styles.deckHeader}>
-            <h2>
-              Your Deck ({currentDeck.length}/8)
-            </h2>
+            <h2>Your Deck ({currentDeck.length}/8)</h2>
             {currentDeck.length > 0 && (
-              <button
-                onClick={handleClearDeck}
-                className={styles.clearButton}
-              >
+              <button onClick={handleClearDeck} className={styles.clearButton}>
                 CLEAR DECK
               </button>
             )}
           </div>
+          
           <div className={styles.deckGrid}>
             {currentDeck.map(card => (
               <div key={card.id} className={isReplaceMode ? styles.shaking : ''}>
@@ -236,8 +324,11 @@ function DecksPage() {
                   isSelected={false}
                   showButtons={selectedCard?.id === card.id && !isReplaceMode}
                   onClick={() => {
-                    if (isReplaceMode) handleDeckCardClick(card);
-                    else setCardAsSelected(card);
+                    if (isReplaceMode) {
+                      handleDeckCardClick(card);
+                    } else {
+                      setSelectedCard(card);
+                    }
                   }}
                   onInfo={() => setPopupCard(card)}
                   onRemove={() => handleRemoveCard(card)}
@@ -245,11 +336,13 @@ function DecksPage() {
               </div>
             ))}
 
+            {/* Empty slots */}
             {Array(8 - currentDeck.length).fill(0).map((_, i) => (
               <div key={`empty-${i}`} className={styles.emptySlot}>+</div>
             ))}
           </div>
           
+          {/* Stats and buttons */}
           <div className={styles.statsBar}>
             <div className={styles.avgElixir}>
               <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirIcon} />
@@ -259,32 +352,27 @@ function DecksPage() {
             <button 
               onClick={() => setShowSharePopup(true)} 
               className={styles.shareButton}
-              title="Share Deck"
               disabled={currentDeck.length !== 8}
             >
               🔗
             </button>
             
-            <button onClick={handleLogout} className={styles.logoutButton} title="Logout">
+            <button onClick={handleLogout} className={styles.logoutButton}>
               🚪
             </button>
           </div>
         </div>
 
+        {/* Replace mode prompt */}
         {isReplaceMode && selectedCard && (
-          <div className={styles.replacePrompt} style={{ marginTop: 12 }}>
-            <p>Click on a card in your deck to replace it</p>
-            <Card
-              card={selectedCard}
-              isSelected={true}
-              showButtons={false}
-              onClick={() => {}}
-            />
+          <div className={styles.replacePrompt}>
+            <p>Click a card in your deck to replace it</p>
+            <Card card={selectedCard} isSelected={true} showButtons={false} onClick={() => {}} />
             <button
               className={styles.cancelButton}
               onClick={() => {
                 setIsReplaceMode(false);
-                setCardAsSelected(null);
+                setSelectedCard(null);
               }}
             >
               Cancel
@@ -292,6 +380,7 @@ function DecksPage() {
           </div>
         )}
 
+        {/* Card collection */}
         <div className={`${styles.collection} ${isReplaceMode ? styles.hidden : ''}`}>
           <div className={styles.separator}></div>
 
@@ -300,16 +389,14 @@ function DecksPage() {
             <FilterBar
               sortBy={sortBy}
               order={order}
-              onSortChange={(s) => setSortBy(s)}
-              onOrderChange={(o) => setOrder(o)}
+              onSortChange={setSortBy}
+              onOrderChange={setOrder}
             />
           </div>
 
           <div className={styles.cardGrid}>
             {sortedCards.length === 0 ? (
-              <div className={styles.cardLoading}>
-                Loading cards...
-              </div>
+              <div className={styles.cardLoading}>Loading cards...</div>
             ) : (
               sortedCards.map(card => {
                 const inDeck = cardIdsInDeck.includes(card.id);
@@ -332,12 +419,9 @@ function DecksPage() {
           </div>
         </div>
 
-        {popupCard && (
-          <CardPopup
-            card={popupCard}
-            onClose={() => setPopupCard(null)}
-          />
-        )}
+        {/* Popups */}
+        {popupCard && <CardPopup card={popupCard} onClose={() => setPopupCard(null)} />}
+        
         {showSharePopup && currentDeck.length === 8 && (
           <ShareDeckPopup
             deck={currentDeck}

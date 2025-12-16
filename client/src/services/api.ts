@@ -1,21 +1,13 @@
-// src/services/api.ts
-
-/**
- * This module is something of a bridge between the client and server
- * It provides functions to interact with backend API endpoints
- */
+// client/src/services/api.ts
 import axios from 'axios';
 import type { Card, Deck, User } from '../types';
 
-// Here I use axios to simplify HTTP requests and avoid manually writing boilerplate code
 const api = axios.create({
   baseURL: 'http://localhost:4000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' }
 });
 
-// JWT Logic - Automatically attach token to requests
+// Attach JWT token to all requests if it exists
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -24,151 +16,97 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-/**
- * @returns All cards from the backend
- */
-export const getAllCards = async (): Promise<Card[]> => {
+// Card endpoints
+export async function getAllCards(): Promise<Card[]> {
   const response = await api.get('/cards');
   return response.data.data.cards;
-};
+}
 
-/**
- * @param id ID of the card to fetch
- * @returns Card with given ID
- */
-export const getCardById = async (id: number): Promise<Card> => {
+export async function getCardById(id: number): Promise<Card> {
   const response = await api.get(`/cards/${id}`);
   return response.data.data.card;
-};
+}
 
-/**
- * Get decks for the authenticated user
- * @returns Array of decks of the user
- */
-export const getUserDecks = async (): Promise<Deck[]> => {
-  const response = await api.get(`/decks`);
+// Deck endpoints
+export async function getUserDecks(): Promise<Deck[]> {
+  const response = await api.get('/decks');
   return response.data.data;
-};
+}
 
-/**
- * @param id ID of the deck to fetch
- * @returns Deck with given ID
- */
-export const getDeckById = async (id: number): Promise<Deck> => {
+export async function getDeckById(id: number): Promise<Deck> {
   const response = await api.get(`/decks/${id}`);
   return response.data.data;
-};
+}
 
-/**
- * @param data Deck creation data (name, description, cardNames, slot, isPublic)
- * @returns Created deck
- */
-export const createDeck = async (data: {
+export async function createDeck(data: {
   name: string;
   description: string;
   cardNames: string[];
   slot: number;
   isPublic: boolean;
-}): Promise<Deck> => {
+}): Promise<Deck> {
   const response = await api.post('/decks', data);
   return response.data.data;
-};
+}
 
-/**
- * @param id ID of the deck to update
- * @param data Update data (name?, description?, cardNames?, isPublic?)
- * @returns Updated deck
- */
-export const updateDeck = async (
-  id: number,
-  data: {
-    name?: string;
-    description?: string;
-    cardNames?: string[];
-    isPublic?: boolean;
-  }
-): Promise<Deck> => {
+export async function updateDeck(id: number, data: any): Promise<Deck> {
   const response = await api.put(`/decks/${id}`, data);
   return response.data.data;
-};
+}
 
-/**
- * @param id ID of the deck to delete
- */
-export const deleteDeck = async (id: number): Promise<void> => {
+export async function deleteDeck(id: number): Promise<void> {
   await api.delete(`/decks/${id}`);
-};
+}
 
-/**
- * @param id ID of the deck to like
- * @returns Updated like count
- */
-export const likeDeck = async (id: number): Promise<number> => {
+export async function likeDeck(id: number): Promise<number> {
   const response = await api.post(`/decks/${id}/like`);
   return response.data.data.likes;
-};
+}
 
-// Auth Functions
-
-/**
- * Login user
- */
-export const login = async (email: string, password: string): Promise<{ user: User; token: string }> => {
+// Auth endpoints
+export async function login(email: string, password: string) {
   const response = await api.post('/auth/login', { email, password });
   return response.data.data;
-};
+}
 
-/**
- * Register new user
- */
-export const register = async (name: string, email: string, password: string): Promise<{ user: User; token: string }> => {
+export async function register(name: string, email: string, password: string) {
   const response = await api.post('/auth/register', { name, email, password });
   return response.data.data;
-};
+}
 
-/**
- * Get current user info
- */
-export const getCurrentUser = async (token: string): Promise<User> => {
+export async function getCurrentUser(token: string): Promise<User> {
   const response = await api.get('/auth/me', {
     headers: { Authorization: `Bearer ${token}` }
   });
   return response.data.data.user;
-};
+}
 
-export const saveToken = (token: string): void => {
+// Token helpers
+export function saveToken(token: string): void {
   localStorage.setItem('token', token);
-};
+}
 
-export const getToken = (): string | null => {
+export function getToken(): string | null {
   return localStorage.getItem('token');
-};
+}
 
-export const removeToken = (): void => {
+export function removeToken(): void {
   localStorage.removeItem('token');
-};
+}
 
-export const isAuthenticated = (): boolean => {
+export function isAuthenticated(): boolean {
   return !!getToken();
-};
+}
 
-/**
- * Get all public decks
- * @returns Array of public decks
- */
-export const getPublicDecks = async (): Promise<any[]> => {
+// Public decks
+export async function getPublicDecks(): Promise<any[]> {
   const response = await api.get('/decks?onlyPublic=true');
   return response.data.data;
-};
+}
 
-/**
- * Get a shared deck by ID (public or with valid link)
- * @param deckId ID of the deck
- * @returns Deck data
- */
-export const getSharedDeck = async (deckId: number): Promise<any> => {
+export async function getSharedDeck(deckId: number): Promise<any> {
   const response = await api.get(`/decks/shared/${deckId}`);
   return response.data.data;
-};
+}
 
 export default api;

@@ -1,3 +1,4 @@
+// server/src/services/authService.ts
 import prisma from '../configs/database';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -8,31 +9,33 @@ const JWT_SECRET = process.env.JWT_SECRET || 'qPreguicaMeu';
 const JWT_EXPIRES_IN = '7d';
 
 /**
- * Service for handling user authentication
+ * Handles user authentication - register, login, verify token
  */
 export class AuthService {
+  
   /**
-   * Registers a new user
+   * Register a new user
    */
   static async register(data: RegisterDTO) {
     const { name, email, password } = data;
 
-    // Validate input
+    // Check all fields exist
     if (!name || !email || !password) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Name, email and password are required' 
+        message: 'Need name, email and password' 
       };
     }
 
+    // Check password length
     if (password.length < 6) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Password must be at least 6 characters' 
+        message: 'Password too short (min 6 chars)' 
       };
     }
 
-    // Check if user already exists
+    // Check if email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -40,14 +43,14 @@ export class AuthService {
     if (existingUser) {
       throw { 
         statusCode: HTTP_STATUS.CONFLICT, 
-        message: 'Email already registered' 
+        message: 'Email already in use' 
       };
     }
 
-    // Hash password
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user in database
     const user = await prisma.user.create({
       data: {
         name,
@@ -62,23 +65,23 @@ export class AuthService {
       }
     });
 
-    // Generate token
-    const token = this.generateToken(user.id);
+    // Create JWT token
+    const token = this.createToken(user.id);
 
     return { user, token };
   }
 
   /**
-   * Logs in a user
+   * Login existing user
    */
   static async login(data: LoginDTO) {
     const { email, password } = data;
 
-    // Validate input
+    // Check fields
     if (!email || !password) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Email and password are required' 
+        message: 'Need email and password' 
       };
     }
 
@@ -90,36 +93,38 @@ export class AuthService {
     if (!user) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Invalid email or password' 
+        message: 'Wrong email or password' 
       };
     }
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Check password
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
-    if (!isPasswordValid) {
+    if (!isPasswordCorrect) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Invalid email or password' 
+        message: 'Wrong email or password' 
       };
     }
 
-    // Generate token
-    const token = this.generateToken(user.id);
+    // Create token
+    const token = this.createToken(user.id);
 
-    // Return user without password
+    // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
     return { user: userWithoutPassword, token };
   }
 
   /**
-   * Verifies a JWT token and returns the user
+   * Verify JWT token and get user
    */
   static async verifyToken(token: string) {
     try {
+      // Decode token
       const decoded = jwt.verify(token, JWT_SECRET) as { userId: number };
       
+      // Get user from database
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
         select: {
@@ -138,18 +143,21 @@ export class AuthService {
       }
 
       return user;
+      
     } catch (error) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'Invalid or expired token' 
+        message: 'Invalid token' 
       };
     }
   }
 
-  /**
-   * Generates a JWT token for a user
-   */
-  private static generateToken(userId: number): string {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  // Create a JWT token for user
+  private static createToken(userId: number): string {
+    return jwt.sign(
+      { userId }, 
+      JWT_SECRET, 
+      { expiresIn: JWT_EXPIRES_IN }
+    );
   }
 }

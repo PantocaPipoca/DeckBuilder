@@ -1,29 +1,18 @@
+// server/src/controllers/deckController.ts
 import { Request, Response } from 'express';
 import { DeckService } from '../services/deckService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { HTTP_STATUS } from '../configs/constants';
 
-/**
- * Controller for deck operations
- */
 export class DeckController {
-/**
-   * Lists all decks with optional filtering
-   * If user is authenticated, shows their decks
-   * If onlyPublic=true, shows all public decks (no auth required)
-   * 
-   * @route GET /api/decks
-   * @query onlyPublic: filter for public decks only
-   */
+  
+  // Get all decks (user's own or public ones)
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
     const onlyPublic = req.query.onlyPublic === 'true';
     
-    // If requesting public decks, allow without auth
+    // Public decks - no auth needed
     if (onlyPublic) {
-      const decks = await DeckService.listDecks({
-        onlyPublic: true,
-      });
-
+      const decks = await DeckService.listDecks({ onlyPublic: true });
       return res.json({
         status: 'success',
         results: decks.length,
@@ -31,18 +20,16 @@ export class DeckController {
       });
     }
 
-    // Otherwise, require authentication and show user's decks
+    // User's own decks - auth required
     if (!req.user) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         status: 'error',
-        message: 'Authentication required'
+        message: 'Login required'
       });
     }
 
-    const userId = req.user.id;
-    
     const decks = await DeckService.listDecks({
-      ownerId: userId,
+      ownerId: req.user.id,
     });
 
     res.json({
@@ -52,14 +39,7 @@ export class DeckController {
     });
   });
 
-  /**
-   * Gets a single deck by ID
-   * Only if it belongs to the authenticated user
-   * 
-   * @route GET /api/decks/:id
-   * @param id: deck ID
-   * @requires authentication
-   */
+  // Get single deck
   static getDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -72,22 +52,12 @@ export class DeckController {
     });
   });
 
-  /**
-   * Creates a new deck for the authenticated user
-   * 
-   * @route POST /api/decks
-   * @body CreateDeckDTO: deck data
-   * @requires authentication
-   */
+  // Create new deck
   static createDeck = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     
-    // Override ownerId with authenticated user's ID
-    const deckData = {
-      ...req.body,
-      ownerId: userId
-    };
-    
+    // Make sure ownerId matches authenticated user
+    const deckData = { ...req.body, ownerId: userId };
     const deck = await DeckService.createDeck(deckData);
 
     res.status(HTTP_STATUS.CREATED).json({
@@ -96,15 +66,7 @@ export class DeckController {
     });
   });
 
-  /**
-   * Updates an existing deck
-   * Only if it belongs to the authenticated user
-   * 
-   * @route PUT /api/decks/:id
-   * @param id: deck ID to update
-   * @body UpdateDeckDTO: fields to update
-   * @requires authentication
-   */
+  // Update deck
   static updateDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -117,14 +79,7 @@ export class DeckController {
     });
   });
 
-  /**
-   * Deletes a deck
-   * Only if it belongs to the authenticated user
-   * 
-   * @route DELETE /api/decks/:id
-   * @param id: deck ID to delete
-   * @requires authentication
-   */
+  // Delete deck
   static deleteDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -134,13 +89,7 @@ export class DeckController {
     res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 
-  /**
-   * Increments like count for a deck
-   * 
-   * @route POST /api/decks/:id/like
-   * @param id: deck ID to like
-   * @requires authentication
-   */
+  // Like a deck
   static likeDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -153,12 +102,7 @@ export class DeckController {
     });
   });
 
-  /**
-   * Gets deck statistics
-   * 
-   * @route GET /api/decks/stats
-   * @returns total, public, private counts and total likes
-   */
+  // Get deck stats
   static getStats = asyncHandler(async (req: Request, res: Response) => {
     const stats = await DeckService.getStats();
 
@@ -168,12 +112,7 @@ export class DeckController {
     });
   });
 
-  /**
-   * Gets a shared deck (public only)
-   * 
-   * @route GET /api/decks/shared/:id
-   * @param id: deck ID
-   */
+  // Get shared deck (public)
   static getSharedDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const deck = await DeckService.getSharedDeck(id);

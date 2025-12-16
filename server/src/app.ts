@@ -1,16 +1,15 @@
-// src/app.ts
-
+// server/src/app.ts
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan'; // logger
+import morgan from 'morgan';
 import routes from './routes';
 import { errorHandler } from './middleware/errorHandler';
 import { notFound } from './middleware/notFound';
 
 const app = express();
 
-// Security & Logging
+// Security and logging middleware
 app.use(helmet());
 app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
@@ -19,10 +18,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-
-/**
- * Root endpoint providing basic information
- */
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'DeckBuilder API',
@@ -33,13 +29,8 @@ app.get('/', (req, res) => {
   });
 });
 
-
-/**
- * Health check endpoint to verify server is running
- * 
- * @returns Server status with timestamp and uptime
- */
-app.get('/health', (_req, res) => {
+// Health check
+app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -48,11 +39,10 @@ app.get('/health', (_req, res) => {
 });
 
 // API routes
-console.log('Routes loaded:', typeof routes, routes);
 app.use('/api', routes);
 
 // Error handling
-app.use(notFound); // Quando n encontra rota tipo /apiasdadsdas
+app.use(notFound);
 app.use(errorHandler);
 
 export default app;

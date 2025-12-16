@@ -1,18 +1,19 @@
+// server/src/configs/seed.ts
 import bcrypt from 'bcryptjs';
 import prisma from './database';
 import { Rarity, CardType } from '@prisma/client';
 
-/**
- * Generates the image URL for a card based on its name
- * @param name Card name
- * @returns Card image URL
- */
-function getCardImageUrl(name: string): string {
-  const slug = name
-    .toLowerCase()
-    .replace(/\./g, '')
-    .replace(/\s+/g, '-')
-    .replace(/'/g, '');
+// Creates card image URL from card name
+function getCardImageUrl(name: string) {
+  // Convert to lowercase
+  let slug = name.toLowerCase();
+  // Remove dots
+  slug = slug.replace(/\./g, '');
+  // Replace spaces with dashes
+  slug = slug.replace(/\s+/g, '-');
+  // Remove apostrophes
+  slug = slug.replace(/'/g, '');
+  
   return `https://cdn.royaleapi.com/static/img/cards-150/${slug}.png`;
 }
 
@@ -60,7 +61,7 @@ const cards = [
   { name: 'Earthquake', elixir: 3, rarity: 'RARE', type: 'SPELL', description: 'Quakes the ground, damages buildings. Can\'t affect troops, only buildings.' },
   { name: 'Heal Spirit', elixir: 1, rarity: 'RARE', type: 'SPELL', description: 'A happy spirit that heals nearby friendly troops. Can be placed anywhere on the battlefield.' },
 
- // === EPIC ===
+  // === EPIC ===
   { name: 'P.E.K.K.A', elixir: 7, rarity: 'EPIC', type: 'TROOP', description: 'A heavily armored, slow melee fighter. Deals high damage and has high hitpoints.' },
   { name: 'Golem', elixir: 8, rarity: 'EPIC', type: 'TROOP', description: 'Slow but durable, only attacks buildings. When destroyed, splits into two Golemites!' },
   { name: 'Baby Dragon', elixir: 4, rarity: 'EPIC', type: 'TROOP', description: 'Burps out big fireballs that deal splash damage. Tanky and deals area damage!' },
@@ -111,7 +112,7 @@ const cards = [
 ];
 
 async function main() {
-
+  // Create test user
   const hashedPassword = await bcrypt.hash('devdev', 10);
   await prisma.user.upsert({
     where: { email: 'dev@dev.com' },
@@ -122,8 +123,11 @@ async function main() {
       name: 'dev',
     },
   });
+  
+  // Delete all existing cards
   await prisma.card.deleteMany();
   
+  // Create all cards
   for (const card of cards) {
     await prisma.card.create({
       data: {
