@@ -33,32 +33,26 @@ function DecksPage() {
     loadData();
   }, []);
 
-  // Load cards and user's saved decks
   async function loadData() {
     try {
       setLoading(true);
       
-      // Get all cards first
       const cards = await getAllCards();
       setAllCards(cards || []);
 
-      // Get user's decks
       const userDecks = await getUserDecks();
       
-      // Create empty deck slots
       const newDecks: CardType[][] = [[], [], [], [], []];
       const newDeckIds: (number | null)[] = [null, null, null, null, null];
 
-      // Fill in the saved decks
+      // Fill in saved decks
       for (let i = 0; i < userDecks.length; i++) {
         const deck = userDecks[i];
         
         if (deck.slot >= 0 && deck.slot < 5) {
-          // Sort cards by position
           const sortedCards = [...deck.cards];
           sortedCards.sort((a: any, b: any) => a.position - b.position);
           
-          // Get full card data
           const deckCards: CardType[] = [];
           for (const dc of sortedCards) {
             const card = cards.find((c: CardType) => c.name === dc.card.name);
@@ -81,12 +75,11 @@ function DecksPage() {
     }
   }
 
-  // Save deck to server when it's complete (8 cards)
+  // Auto-save when deck is complete
   async function saveDeck(deckIndex: number, cards: CardType[]) {
     if (cards.length !== 8) return;
 
     try {
-      // Get card names
       const cardNames: string[] = [];
       for (const card of cards) {
         cardNames.push(card.name);
@@ -100,7 +93,6 @@ function DecksPage() {
         isPublic: false,
       };
 
-      // Update or create
       if (deckIds[deckIndex]) {
         await updateDeck(deckIds[deckIndex]!, deckData);
       } else {
@@ -115,7 +107,6 @@ function DecksPage() {
     }
   }
 
-  // Sort cards based on current filters
   function getSortedCards() {
     const sorted = [...allCards];
     
@@ -127,7 +118,6 @@ function DecksPage() {
       } else if (sortBy === 'elixir') {
         comparison = a.elixir - b.elixir;
       } else if (sortBy === 'rarity') {
-        // COMMON=0, RARE=1, EPIC=2, LEGENDARY=3
         const rarityValues: any = { 
           COMMON: 0, 
           RARE: 1, 
@@ -147,19 +137,16 @@ function DecksPage() {
     return sorted;
   }
 
-  // Click on card in collection
   function handleCollectionCardClick(card: CardType) {
     setSelectedCard(card);
     setIsReplaceMode(false);
   }
 
-  // Add card to deck
   async function handleUseCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
     
-    // Check if deck is full
     if (currentDeck.length >= 8) {
-      // Enter replace mode
+      // Deck is full - enter replace mode
       setIsReplaceMode(true);
       if (deckBuilderRef.current) {
         deckBuilderRef.current.scrollIntoView({ 
@@ -170,26 +157,24 @@ function DecksPage() {
       return;
     }
     
-    // Add card
+    // Add card to deck
     const newDecks = [...decks];
     const updatedDeck = [...currentDeck, card];
     newDecks[activeDeckIndex] = updatedDeck;
     setDecks(newDecks);
     setSelectedCard(null);
 
-    // Auto-save if complete
     if (updatedDeck.length === 8) {
       await saveDeck(activeDeckIndex, updatedDeck);
     }
   }
 
-  // Replace card in deck (when in replace mode)
+  // Replace card when in replace mode
   async function handleDeckCardClick(cardToReplace: CardType) {
     if (!isReplaceMode || !selectedCard) return;
     
     const currentDeck = decks[activeDeckIndex];
     
-    // Replace the card
     const newDeck: CardType[] = [];
     for (const card of currentDeck) {
       if (card.id === cardToReplace.id) {
@@ -208,11 +193,9 @@ function DecksPage() {
     await saveDeck(activeDeckIndex, newDeck);
   }
 
-  // Remove card from deck
   function handleRemoveCard(card: CardType) {
     const currentDeck = decks[activeDeckIndex];
     
-    // Filter out the card
     const newDeck: CardType[] = [];
     for (const c of currentDeck) {
       if (c.id !== card.id) {
@@ -226,7 +209,6 @@ function DecksPage() {
     setSelectedCard(null);
   }
 
-  // Clear entire deck
   async function handleClearDeck() {
     if (!window.confirm('Clear this deck?')) return;
 
@@ -234,7 +216,6 @@ function DecksPage() {
     newDecks[activeDeckIndex] = [];
     setDecks(newDecks);
 
-    // Delete from server if exists
     if (deckIds[activeDeckIndex]) {
       try {
         await deleteDeck(deckIds[activeDeckIndex]!);
@@ -247,7 +228,6 @@ function DecksPage() {
     }
   }
 
-  // Switch between deck slots
   function switchDeck(index: number) {
     setActiveDeckIndex(index);
     setSelectedCard(null);
@@ -261,13 +241,13 @@ function DecksPage() {
 
   const currentDeck = decks[activeDeckIndex];
   
-  // Get IDs of cards in current deck
+  // Get card IDs in current deck
   const cardIdsInDeck: number[] = [];
   for (const card of currentDeck) {
     cardIdsInDeck.push(card.id);
   }
 
-  // Calculate average elixir cost
+  // Calculate average elixir
   let avgElixir = '0.0';
   if (currentDeck.length > 0) {
     let total = 0;
@@ -292,7 +272,7 @@ function DecksPage() {
     <div className={styles.page}>
       <div className={styles.deckBuilder}>
         
-        {/* Deck slot buttons (1-5) */}
+        {/* Deck slots 1-5 */}
         <div className={styles.deckSlots}>
           {[0, 1, 2, 3, 4].map(i => (
             <button
@@ -305,7 +285,7 @@ function DecksPage() {
           ))}
         </div>
 
-        {/* Current deck area */}
+        {/* Current deck display */}
         <div ref={deckBuilderRef} className={styles.deckSection}>
           <div className={styles.deckHeader}>
             <h2>Your Deck ({currentDeck.length}/8)</h2>
@@ -342,7 +322,7 @@ function DecksPage() {
             ))}
           </div>
           
-          {/* Stats and buttons */}
+          {/* Stats bar */}
           <div className={styles.statsBar}>
             <div className={styles.avgElixir}>
               <img src="/src/assets/elixir.png" alt="Elixir" className={styles.elixirIcon} />
@@ -363,7 +343,7 @@ function DecksPage() {
           </div>
         </div>
 
-        {/* Replace mode prompt */}
+        {/* Replace mode UI */}
         {isReplaceMode && selectedCard && (
           <div className={styles.replacePrompt}>
             <p>Click a card in your deck to replace it</p>
@@ -419,7 +399,6 @@ function DecksPage() {
           </div>
         </div>
 
-        {/* Popups */}
         {popupCard && <CardPopup card={popupCard} onClose={() => setPopupCard(null)} />}
         
         {showSharePopup && currentDeck.length === 8 && (

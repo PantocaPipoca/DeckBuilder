@@ -1,35 +1,16 @@
 // src/types/deck.types.ts
 
-
-/**
- * Data required to create a new deck
- * 
- * @property name: deck name
- * @property description: deck description
- * @property cardNames: array of 8 card names
- * @property slot: deck slot number 0-4
- * @property isPublic: is the deck publicly visible
- * @property ownerId: deck owner's id
- */
+// Data needed to create a deck
 export interface CreateDeckDTO {
   name: string;
   description: string;
-  cardNames: string[];
-  slot: number;
+  cardNames: string[]; // 8 card names
+  slot: number; // 0-4
   isPublic: boolean;
   ownerId: number;
 }
 
-/**
- * Data you can update in an existing deck
- * All fields are optional: only provided fields will be updated
- * 
- * @property name: deck name
- * @property description: deck description
- * @property cardNames: array of 8 card names
- * @property slot: deck slot number
- * @property isPublic: is the deck publicly visible
- */
+// Data you can update
 export interface UpdateDeckDTO {
   name?: string;
   description?: string;
@@ -38,14 +19,7 @@ export interface UpdateDeckDTO {
   isPublic?: boolean;
 }
 
-/**
- * Query parameters for filtering decks
- * 
- * @property onlyPublic: if true, returns only public decks
- * @property ownerId: filter decks by owner ID
- * @property limit: maximum number of results to return
- * @property offset: number of results to skip (for possible future pagination)
- */
+// Filters for getting decks
 export interface DeckQueryParams {
   onlyPublic?: boolean;
   ownerId?: number;

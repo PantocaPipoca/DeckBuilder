@@ -4,10 +4,6 @@ import { CardService } from '../services/cardService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { HTTP_STATUS } from '../configs/constants';
 
-/**
- * CardController provides static methods to manage cards.
- * Used in REST API routes.
- */
 export const listCards = asyncHandler(async (req: Request, res: Response) => {
   const { rarity, type, elixir } = req.query;
   
@@ -25,9 +21,6 @@ export const listCards = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Get a single card by ID
- */
 export const getCardById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const card = await CardService.getCardById(parseInt(id!));
@@ -38,9 +31,6 @@ export const getCardById = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-/**
- * Get a single card by name
- */
 export const getCardStats = asyncHandler(async (req: Request, res: Response) => {
   const stats = await CardService.getStats();
   

@@ -1,4 +1,4 @@
-/* src/styles/FilterBar.module.css - ORDEM CORRETA */
+/* src/styles/FilterBar.module.css */
 
 .filterBar {
   display: flex;
@@ -7,7 +7,6 @@
   align-items: center;
 }
 
-/* Botão de ordem PRIMEIRO (esquerda) */
 .orderButton {
   width: 48px;
   height: 48px;
@@ -25,7 +24,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  order: 1; /* Aparece primeiro */
+  order: 1;
 }
 
 .orderButton:hover {
@@ -42,7 +41,6 @@
     0 4px 8px rgba(74, 123, 181, 0.4);
 }
 
-/* Botão de sort DEPOIS (direita) - AZUL */
 .sortButton {
   padding: 10px 24px;
   background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
@@ -57,7 +55,7 @@
     0 4px 0 #1e3a5f,
     0 6px 12px rgba(74, 123, 181, 0.4);
   letter-spacing: 0.5px;
-  order: 2; /* Aparece depois */
+  order: 2;
 }
 
 .sortButton:hover {

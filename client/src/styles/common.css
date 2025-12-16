@@ -1,7 +1,7 @@
-/* client/src/styles/common.css - Shared styles to avoid repetition */
+/* client/src/styles/common.css - Shared styles */
 
-/* Common button styles */
-.btn-primary {
+/* Common Clash Royale button style */
+.cr-button {
   padding: 12px 32px;
   background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
   border: 3px solid #60a5fa;
@@ -14,36 +14,48 @@
   transition: all 0.15s;
 }
 
-.btn-primary:hover {
+.cr-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 0 #1e3a5f, 0 8px 16px rgba(74, 123, 181, 0.6);
 }
 
-.btn-primary:active {
+.cr-button:active {
   transform: translateY(2px);
   box-shadow: 0 2px 0 #1e3a5f, 0 4px 8px rgba(74, 123, 181, 0.4);
 }
 
-.btn-danger {
-  padding: 8px 16px;
+/* Red button variant */
+.cr-button-red {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   border: 3px solid #f87171;
-  border-radius: 10px;
-  color: white;
-  font-weight: 700;
-  font-size: 12px;
-  cursor: pointer;
-  box-shadow: 0 4px 0 #b91c1c;
-  transition: all 0.15s;
+  box-shadow: 0 4px 0 #b91c1c, 0 6px 12px rgba(239, 68, 68, 0.4);
 }
 
-.btn-danger:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #b91c1c;
+.cr-button-red:hover {
+  box-shadow: 0 6px 0 #b91c1c, 0 8px 16px rgba(239, 68, 68, 0.6);
 }
 
-/* Common input styles */
-.input-field {
+.cr-button-red:active {
+  box-shadow: 0 2px 0 #b91c1c, 0 4px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Green button variant */
+.cr-button-green {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 3px solid #34d399;
+  box-shadow: 0 4px 0 #047857, 0 6px 12px rgba(16, 185, 129, 0.4);
+}
+
+.cr-button-green:hover:not(:disabled) {
+  box-shadow: 0 6px 0 #047857, 0 8px 16px rgba(16, 185, 129, 0.6);
+}
+
+.cr-button-green:active:not(:disabled) {
+  box-shadow: 0 2px 0 #047857, 0 4px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Input field style */
+.cr-input {
   padding: 10px 12px;
   background: rgba(30, 58, 95, 0.5);
   border: 2px solid rgba(74, 123, 181, 0.5);
@@ -53,14 +65,14 @@
   transition: all 0.2s;
 }
 
-.input-field:focus {
+.cr-input:focus {
   outline: none;
   border-color: #60a5fa;
   background: rgba(30, 58, 95, 0.7);
 }
 
-/* Common card container */
-.card-container {
+/* Card container */
+.cr-card {
   background: rgba(26, 47, 77, 0.95);
   border-radius: 16px;
   padding: 20px;
@@ -68,8 +80,9 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Text shadows for headers */
-.text-shadow-gold {
+/* Gold text shadow */
+.cr-gold-text {
+  color: #ffd700;
   text-shadow: 
     2px 2px 0 #1a1d29,
     -1px -1px 0 #1a1d29,
@@ -77,8 +90,8 @@
     -1px 1px 0 #1a1d29;
 }
 
-/* Elixir badge - used everywhere */
-.elixir-badge {
+/* Elixir badge */
+.cr-elixir {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -91,13 +104,13 @@
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.elixir-icon {
+.cr-elixir-icon {
   width: 24px;
   height: 24px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-/* Loading states */
+/* Loading state */
 .loading {
   display: flex;
   justify-content: center;
@@ -108,7 +121,7 @@
   color: white;
 }
 
-/* Empty states */
+/* Empty state */
 .empty-state {
   display: flex;
   flex-direction: column;

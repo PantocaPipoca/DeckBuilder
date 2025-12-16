@@ -16,11 +16,8 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
-          {/* Public shared deck route */}
           <Route path="/deck/:userId/:deckId" element={<SharedDeckPage />} />
           
-          {/* Protected routes */}
           <Route 
             path="/decks" 
             element={
@@ -38,7 +35,6 @@ function App() {
             } 
           />
           
-          {/* Redirect root to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>

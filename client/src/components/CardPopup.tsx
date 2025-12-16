@@ -1,5 +1,4 @@
 // src/components/CardPopup.tsx
-
 import styles from '../styles/CardPopup.module.css';
 import type { CardPopupProps } from '../types';
 
@@ -10,16 +9,12 @@ function CardPopup({ card, onClose }: CardPopupProps) {
     <>
       <div className={styles.backdrop} onClick={onClose} />
       
-      {/* Popup */}
       <div className={styles.popup}>
-        {/* Close button */}
         <button className={styles.closeButton} onClick={onClose}>
           ✕
         </button>
         
-        {/* Top section: Card image on left, name and stats on right */}
         <div className={styles.topSection}>
-          {/* Card image with elixir counter */}
           <div className={styles.cardContainer}>
             <img src={card.iconUrl} alt={card.name} className={styles.image} />
             <div className={styles.elixirBadge}>
@@ -27,7 +22,7 @@ function CardPopup({ card, onClose }: CardPopupProps) {
               <span>{card.elixir}</span>
             </div>
           </div>
-          {/* Right side: name and stats */}
+          
           <div className={styles.statsBox}>
             <h2 className={styles.name}>{card.name}</h2>
             <div style={{ flex: 1 }} />
@@ -44,7 +39,6 @@ function CardPopup({ card, onClose }: CardPopupProps) {
           </div>
         </div>
         
-        {/* Description */}
         <p className={styles.description}>{card.description}</p>
       </div>
     </>

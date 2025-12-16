@@ -6,13 +6,8 @@ import authRoutes from './authRoutes';
 
 const router = Router();
 
-// Card routes
 router.use('/cards', cardRoutes);
-
-// Deck routes
 router.use('/decks', deckRoutes);
-
-// Auth routes
 router.use('/auth', authRoutes);
 
 export default router;

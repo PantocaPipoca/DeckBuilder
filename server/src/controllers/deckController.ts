@@ -6,11 +6,10 @@ import { HTTP_STATUS } from '../configs/constants';
 
 export class DeckController {
   
-  // Get all decks (user's own or public ones)
+  // Get decks - either user's own or public ones
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
     const onlyPublic = req.query.onlyPublic === 'true';
     
-    // Public decks - no auth needed
     if (onlyPublic) {
       const decks = await DeckService.listDecks({ onlyPublic: true });
       return res.json({
@@ -20,7 +19,7 @@ export class DeckController {
       });
     }
 
-    // User's own decks - auth required
+    // Need to be logged in to get your own decks
     if (!req.user) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         status: 'error',
@@ -39,7 +38,6 @@ export class DeckController {
     });
   });
 
-  // Get single deck
   static getDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -52,11 +50,10 @@ export class DeckController {
     });
   });
 
-  // Create new deck
   static createDeck = asyncHandler(async (req: Request, res: Response) => {
     const userId = req.user!.id;
     
-    // Make sure ownerId matches authenticated user
+    // Make sure user can't create decks for other users
     const deckData = { ...req.body, ownerId: userId };
     const deck = await DeckService.createDeck(deckData);
 
@@ -66,7 +63,6 @@ export class DeckController {
     });
   });
 
-  // Update deck
   static updateDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -79,7 +75,6 @@ export class DeckController {
     });
   });
 
-  // Delete deck
   static deleteDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -89,7 +84,6 @@ export class DeckController {
     res.status(HTTP_STATUS.NO_CONTENT).send();
   });
 
-  // Like a deck
   static likeDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;
@@ -102,7 +96,6 @@ export class DeckController {
     });
   });
 
-  // Get deck stats
   static getStats = asyncHandler(async (req: Request, res: Response) => {
     const stats = await DeckService.getStats();
 
@@ -112,7 +105,7 @@ export class DeckController {
     });
   });
 
-  // Get shared deck (public)
+  // Public endpoint to view shared decks
   static getSharedDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const deck = await DeckService.getSharedDeck(id);
