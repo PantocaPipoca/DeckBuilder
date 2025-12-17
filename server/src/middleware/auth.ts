@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/authService';
 import { HTTP_STATUS } from '../configs/constants';
 
-// Extend Express Request to include user
 declare global {
   namespace Express {
     interface Request {
@@ -19,6 +18,7 @@ declare global {
 
 /**
  * Middleware to protect routes requiring authentication
+ * @throws 400 if no token or not good token
  */
 export const authenticate = async (
   req: Request,
@@ -38,7 +38,7 @@ export const authenticate = async (
 
     const token = authHeader.substring(7); // Remove 'Bearer '
 
-    // Verify token and get user
+    //verify token and get user
     const user = await AuthService.verifyToken(token);
 
     // Attach user to request
@@ -54,7 +54,7 @@ export const authenticate = async (
 };
 
 /**
- * Optional authentication - doesn't fail if no token provided
+ * Optional auth doesnt fail if no token
  */
 export const optionalAuth = async (
   req: Request,
@@ -72,7 +72,7 @@ export const optionalAuth = async (
     
     next();
   } catch (error) {
-    // Ignore errors in optional auth
+    // ignore errors
     next();
   }
 };

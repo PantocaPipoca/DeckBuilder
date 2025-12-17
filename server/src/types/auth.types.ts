@@ -2,7 +2,7 @@
 /**
  * Data required for user registration
  * 
- * @property name: user's name
+ * @property name: users name
  * @property email: user's email
  * @property password: user's password
  */
@@ -15,8 +15,8 @@ export interface RegisterDTO {
 /**
  * Data required for user login
  * 
- * @property email: user's email
- * @property password: user's password
+ * @property email: users email
+ * @property pasword: user's password
  */
 export interface LoginDTO {
   email: string;

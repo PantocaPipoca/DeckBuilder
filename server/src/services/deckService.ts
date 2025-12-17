@@ -4,9 +4,16 @@ import { CreateDeckDTO, UpdateDeckDTO, DeckQueryParams } from '../types/deck.typ
 import { DECK_CONFIG } from '../configs/constants';
 import { HTTP_STATUS } from '../configs/constants';
 
+/**
+ * Contacts the database and gets info I use this in controllers
+ */
 export class DeckService {
 
-  // List decks with filters
+  /**
+   * List all decks that are public or belong to the user
+   * @param params DeckQueryParams
+   * @returns List of decks
+   */
   static async listDecks(params: DeckQueryParams = {}) {
     const { onlyPublic, ownerId, limit = 50, offset = 0 } = params;
     
@@ -33,7 +40,12 @@ export class DeckService {
     });
   }
 
-  // Get single deck
+  /**
+   * Get a single deck by ID
+   * @param id Deck ID
+   * @param userId you can pass a userid to check if its the owners deck
+   * @returns 
+   */
   static async getDeckById(id: number, userId?: number) {
     const deck = await prisma.deck.findUnique({
       where: { id },
@@ -58,7 +70,12 @@ export class DeckService {
     return deck;
   }
 
-  // Check if user already has a deck in this slot
+  /**
+   * Check if slot is already used
+   * @param userId owner id
+   * @param slot deck slot (0-4)
+   * @param excludeDeckId deck ID to exclude
+   */
   private static async checkSlotAvailable(userId: number, slot: number, excludeDeckId?: number) {
     const where: any = { ownerId: userId, slot };
     if (excludeDeckId) {
@@ -75,7 +92,11 @@ export class DeckService {
     }
   }
 
-  // Create new deck
+  /**
+   * Create deck
+   * @param data CreateDeckDTO 
+   * @returns new deck
+   */
   static async createDeck(data: CreateDeckDTO) {
     // Check slot
     await this.checkSlotAvailable(data.ownerId, data.slot);
@@ -88,12 +109,12 @@ export class DeckService {
       };
     }
 
-    // Check for duplicates
+    //Check for duplicates
     const uniqueCards = new Set(data.cardNames);
     if (uniqueCards.size !== DECK_CONFIG.CARDS_PER_DECK) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
-        message: 'No duplicate cards allowed' 
+        message: 'no duplicate cards allowed' 
       };
     }
 
@@ -109,13 +130,13 @@ export class DeckService {
       };
     }
 
-    // Map card names to IDs
+    //map card names to IDs
     const cardMap = new Map();
     for (const card of cards) {
       cardMap.set(card.name, card.id);
     }
 
-    // Calculate average elixir
+    //calculate avg elixir
     let totalElixir = 0;
     for (const card of cards) {
       totalElixir += card.elixir;
@@ -150,17 +171,23 @@ export class DeckService {
     return deck;
   }
   
-  // Update deck
+  /**
+   * Update deck
+   * @param id deck id
+   * @param data UpdateDeckDTO
+   * @param userId owners id
+   * @returns new updated deck
+   */
   static async updateDeck(id: number, data: UpdateDeckDTO, userId: number) {
     // Check ownership
     const existing = await this.getDeckById(id, userId);
 
-    // Check new slot if changing
+    //Check new slot if changing
     if (data.slot !== undefined && data.slot !== existing.slot) {
       await this.checkSlotAvailable(userId, data.slot, id);
     }
 
-    // If updating cards
+    //if updating cards
     if (data.cardNames) {
       if (data.cardNames.length !== DECK_CONFIG.CARDS_PER_DECK) {
         throw { 
@@ -247,13 +274,23 @@ export class DeckService {
     });
   }
 
-  // Delete deck
+  /**
+   * Just deletes the deck
+   * @param id deck id
+   * @param userId owner id
+   * @returns  deleted deck
+   */
   static async deleteDeck(id: number, userId: number) {
     await this.getDeckById(id, userId);
     return prisma.deck.delete({ where: { id } });
   }
 
-  // Like deck
+  /**
+   * like deck
+   * @param id id to like
+   * @param userId user liking
+   * @returns new like count
+   */
   static async likeDeck(id: number, userId: number) {
     await this.getSharedDeck(id);
 
@@ -285,7 +322,10 @@ export class DeckService {
     return deck.likes;
   }
 
-  // Get stats
+  /**
+   * Get stats of decks
+   * @returns deck stats like total, public and average eligir global
+   */
   static async getStats() {
     const [totalDecks, publicDecks, totalCards, avgDeckElixir] = await Promise.all([
       prisma.deck.count(),
@@ -303,7 +343,12 @@ export class DeckService {
     };
   }
 
-  // Get shared deck (public only)
+  /**
+   * Get the decks info for public viewing diferent from getDeckById
+   * bcs it doesnt depend on ownership but on public status
+   * @param id deck id
+   * @returns deck info
+   */
   static async getSharedDeck(id: number) {
     const deck = await prisma.deck.findUnique({
       where: { id },
@@ -321,7 +366,7 @@ export class DeckService {
     }
 
     if (!deck.isPublic) {
-      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck is private' };
+      throw { statusCode: HTTP_STATUS.NOT_FOUND, message: 'Deck private' };
     }
 
     return deck;

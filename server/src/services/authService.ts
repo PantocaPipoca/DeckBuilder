@@ -9,12 +9,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'qPreguicaMeu';
 const JWT_EXPIRES_IN = '7d';
 
 /**
- * Handles user authentication - register, login, verify token
+ * Contacts the database and gets info I use this in controllers
+ * and manages the logic of auth.
  */
 export class AuthService {
   
   /**
-   * Register a new user
+   *register new user
+   * @param data registration data, name, email and password
+   * @return created user and token
    */
   static async register(data: RegisterDTO) {
     const { name, email, password } = data;
@@ -27,7 +30,7 @@ export class AuthService {
       };
     }
 
-    // Check password length
+    // Check passwords length
     if (password.length < 6) {
       throw { 
         statusCode: HTTP_STATUS.BAD_REQUEST, 
@@ -35,7 +38,7 @@ export class AuthService {
       };
     }
 
-    // Check if email already exists
+    // If email already exists
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
@@ -47,7 +50,7 @@ export class AuthService {
       };
     }
 
-    // Hash the password
+    // hash the with bcrypt good for not storing passord in database avoids oppsies
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user in database
@@ -65,7 +68,7 @@ export class AuthService {
       }
     });
 
-    // Create JWT token
+    //create JWT token
     const token = this.createToken(user.id);
 
     return { user, token };
@@ -73,6 +76,7 @@ export class AuthService {
 
   /**
    * Login existing user
+   * @param data email and password
    */
   static async login(data: LoginDTO) {
     const { email, password } = data;
@@ -118,6 +122,9 @@ export class AuthService {
 
   /**
    * Verify JWT token and get user
+   * everytime a protected route is clicked
+   * @param token JWT token
+   * @return Users info
    */
   static async verifyToken(token: string) {
     try {
@@ -152,7 +159,11 @@ export class AuthService {
     }
   }
 
-  // Create a JWT token for user
+  /**
+   * Create JWTs token
+   * @param userId user ID
+   * @returns token
+   */
   private static createToken(userId: number): string {
     return jwt.sign(
       { userId }, 

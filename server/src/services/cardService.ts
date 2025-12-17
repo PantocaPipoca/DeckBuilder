@@ -4,7 +4,7 @@ import { Rarity, CardType } from '@prisma/client';
 import { HTTP_STATUS } from '../configs/constants';
 
 /**
- * Service for card database operations
+ * Contacts the database and gets info I use this in controllers
  */
 export class CardService {
   
@@ -36,6 +36,7 @@ export class CardService {
 
   /**
    * Get a single card by ID
+   * @param id Cards id
    */
   static async getCardById(id: number) {
     const card = await prisma.card.findUnique({ 
@@ -54,6 +55,7 @@ export class CardService {
 
   /**
    * Get a card by name
+   * @param name card name
    */
   static async getCardByName(name: string) {
     const card = await prisma.card.findUnique({ 
@@ -71,10 +73,10 @@ export class CardService {
   }
 
   /**
-   * Get card statistics
+   *get card statis
    */
   static async getStats() {
-    // Total cards
+    //total cards
     const total = await prisma.card.count();
     
     // Count by rarity

@@ -7,12 +7,12 @@ const router = Router();
 
 // Public routes
 router.get('/stats', DeckController.getStats);
-router.get('/shared/:id', DeckController.getSharedDeck); // ADICIONAR ESTA LINHA
+router.get('/shared/:id', DeckController.getSharedDeck);
 
-// Routes with optional auth (for public decks)
+// optional authentication
 router.get('/', optionalAuth, DeckController.listDecks);
 
-// Protected routes - require authentication
+// necessary authentication
 router.post('/', authenticate, DeckController.createDeck);
 router.get('/:id', authenticate, DeckController.getDeck);
 router.put('/:id', authenticate, DeckController.updateDeck);

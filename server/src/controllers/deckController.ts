@@ -4,9 +4,14 @@ import { DeckService } from '../services/deckService';
 import { asyncHandler } from '../utils/asyncHandler';
 import { HTTP_STATUS } from '../configs/constants';
 
+/**
+ * static funcitons to use on Route handlers
+ */
 export class DeckController {
   
-  // Get decks - either user's own or public ones
+  /**
+   * List decks public and users
+   */
   static listDecks = asyncHandler(async (req: Request, res: Response) => {
     const onlyPublic = req.query.onlyPublic === 'true';
     
@@ -19,7 +24,7 @@ export class DeckController {
       });
     }
 
-    // Need to be logged in to get your own decks
+    // need to auth to see yor dekcs
     if (!req.user) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         status: 'error',
@@ -38,6 +43,9 @@ export class DeckController {
     });
   });
 
+  /**
+   * Get a specific deck by its ID
+   */
   static getDeck = asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const userId = req.user!.id;

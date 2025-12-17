@@ -1,14 +1,9 @@
 // src/index.ts
-/**
- * Start of the web server
- * 
- * Starts the the server with express and handles graceful shutdown
- * loads environment variables, connects to the database, and listens for HTTP requests.
- */
 import 'dotenv/config';
 import app from './app';
 import prisma from './configs/database';
 
+// Servers port
 const PORT = process.env.PORT || 4000;
 
 const server = app.listen(PORT, () => {
@@ -16,16 +11,7 @@ const server = app.listen(PORT, () => {
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-/**
- * Graceful shutdown handler
- * 
- * Stops new requests, 
- * Finishes existing requests, 
- * Closes database connections (DOESNT CLOSE THE FKNG DOCKER), 
- * Force exit if 10 secs excedet
- * 
- * @param signal - The shutdown signal received (SIGTERM or SIGINT not forced)
- */
+// Handle cntrl c nicely
 const gracefulShutdown = async (signal: string) => {
   console.log(`\n${signal} received.`);
   
