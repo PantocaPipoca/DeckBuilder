@@ -1,7 +1,5 @@
 # DeckBuilder - Clash Royale Deck Management API
 
-A full-stack application for creating, managing, and sharing Clash Royale decks.
-
 ## Quick Start
 
 ### Prerequisites
