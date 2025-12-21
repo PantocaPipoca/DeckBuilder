@@ -1,17 +1,7 @@
 // client/src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import * as api from '../services/api';
-import type { User } from '../types';
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
-}
+import type { User, AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -20,7 +10,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from localStorage on mount
+  // Load user from localStorage
   useEffect(() => {
     const storedToken = api.getToken();
     if (storedToken) {
@@ -31,12 +21,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  /**
+   * Loads users data through token
+   * @param authToken token duh
+   */
   async function loadUser(authToken: string) {
     try {
       const userData = await api.getCurrentUser(authToken);
       setUser(userData);
     } catch (error) {
-      console.error('Failed to load user:', error);
+      console.error('Fail load user:', error);
       api.removeToken();
       setToken(null);
     } finally {
@@ -44,6 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  /**
+   * Login function
+   * @param email yea
+   * @param password exactly
+   */
   async function login(email: string, password: string) {
     const { user: userData, token: authToken } = await api.login(email, password);
     api.saveToken(authToken);
@@ -51,6 +50,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   }
 
+  /**
+   * Reg function
+   * @param name .
+   * @param email .
+   * @param password .
+   */
   async function register(name: string, email: string, password: string) {
     const { user: userData, token: authToken } = await api.register(name, email, password);
     api.saveToken(authToken);
@@ -58,6 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
   }
 
+  /**
+   * Logout function
+   */
   function logout() {
     api.removeToken();
     setToken(null);
@@ -77,6 +85,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/**
+ * Hook to use AuthContext
+ * @returns AuthContext value
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -163,7 +163,6 @@
   font-size: 20px;
 }
 
-/* Stats row: Rarity and Type side by side */
 .statsRow {
   display: flex;
   gap: 15px;
@@ -199,7 +198,6 @@
   color: white;
 }
 
-/* Colors by rarity */
 .value.common { 
   color: #94a3b8;
   text-shadow: 0 0 8px rgba(148, 163, 184, 0.5);

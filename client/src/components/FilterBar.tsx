@@ -5,7 +5,9 @@ import styles from '../styles/FilterBar.module.css';
 
 function FilterBar({ sortBy, order, onSortChange, onOrderChange } : FilterState) {
   
-  // Cicle through sortBy options
+  /**
+   * Cicle through sortBy options
+   */
   function cycleSortBy() {
     const cycle: Record<SortBy, SortBy> = { 
       rarity: 'name', 
@@ -15,12 +17,13 @@ function FilterBar({ sortBy, order, onSortChange, onOrderChange } : FilterState)
     onSortChange(cycle[sortBy]);
   }
   
-  // Toggle asc and desc
+  /**
+   * Toggle asc and desc
+   */
   function toggleOrder() {
     onOrderChange(order === 'asc' ? 'desc' : 'asc');
   }
   
-  // Label for the sort button
   const sortLabel = {
     rarity: 'By Rarity',
     name: 'By Name',

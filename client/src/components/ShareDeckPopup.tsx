@@ -3,15 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateDeck, createDeck, getDeckById } from '../services/api';
 import styles from '../styles/ShareDeckPopup.module.css';
-import type { Card } from '../types';
-
-interface ShareDeckPopupProps {
-  deck: Card[];
-  deckId: number | null;
-  deckSlot: number;
-  onClose: () => void;
-  onUpdate: (deck: any) => void;
-}
+import type { ShareDeckPopupProps } from '../types';
 
 function ShareDeckPopup({ deck, deckId, deckSlot, onClose, onUpdate }: ShareDeckPopupProps) {
   const { user } = useAuth();
@@ -58,7 +50,7 @@ function ShareDeckPopup({ deck, deckId, deckSlot, onClose, onUpdate }: ShareDeck
         description: description || `Deck slot ${deckSlot + 1}`,
         cardNames,
         slot: deckSlot,
-        isPublic, // MANTÉM O isPublic atual
+        isPublic,
       };
 
       let result;
@@ -82,7 +74,7 @@ function ShareDeckPopup({ deck, deckId, deckSlot, onClose, onUpdate }: ShareDeck
     if (shareUrl) {
       navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 2067);
     }
   }
 

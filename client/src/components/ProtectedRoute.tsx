@@ -6,6 +6,9 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * Makes a route only accessible with auth
+ */
 function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, loading } = useAuth();
 

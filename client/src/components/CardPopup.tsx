@@ -3,6 +3,11 @@
 import styles from '../styles/CardPopup.module.css';
 import type { CardPopupProps } from '../types';
 
+/**
+ * Self-explanatory
+ * @param param0 props
+ * @returns component
+ */
 function CardPopup({ card, onClose }: CardPopupProps) {
   if (!card) return null;
   
@@ -17,9 +22,7 @@ function CardPopup({ card, onClose }: CardPopupProps) {
           ✕
         </button>
         
-        {/* Top section: Card image on left, name and stats on right */}
         <div className={styles.topSection}>
-          {/* Card image with elixir counter */}
           <div className={styles.cardContainer}>
             <img src={card.iconUrl} alt={card.name} className={styles.image} />
             <div className={styles.elixirBadge}>
@@ -44,7 +47,6 @@ function CardPopup({ card, onClose }: CardPopupProps) {
           </div>
         </div>
         
-        {/* Description */}
         <p className={styles.description}>{card.description}</p>
       </div>
     </>

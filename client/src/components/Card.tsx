@@ -4,11 +4,10 @@ import styles from '../styles/Card.module.css';
 import type { CardProps, Rarity } from '../types';
 
 /**
- * Componente simples: recebe dados da carta e função de click
+ * Card component ez
  */
 function Card({ card, isSelected, onClick, showButtons, onInfo, onUse, onRemove }: CardProps) {
   
-  // Cor do glow baseado na rarity
   const rarityColors: Record<Rarity, string> = {
     'LEGENDARY': '#FFD700',
     'EPIC': '#A855F7',

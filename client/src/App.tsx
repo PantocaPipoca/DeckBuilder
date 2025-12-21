@@ -1,6 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider as Auth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -11,7 +11,7 @@ import './styles/global.css';
 
 function App() {
   return (
-    <AuthProvider>
+    <Auth>
       <Router>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -42,7 +42,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
-    </AuthProvider>
+    </Auth>
   );
 }
 

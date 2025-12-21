@@ -2,34 +2,20 @@
 import { useState } from 'react';
 import { likeDeck } from '../services/api';
 import styles from '../styles/DeckCard.module.css';
+import type { DeckCardProps } from '../types';
 
-interface DeckCardProps {
-  deck: {
-    id: number;
-    name: string;
-    description: string;
-    avgElixir: number;
-    likes: number;
-    owner: {
-      id: number;
-      name: string;
-    };
-    cards: Array<{
-      position: number;
-      card: {
-        name: string;
-        elixir: number;
-        rarity: string;
-      };
-    }>;
-    createdAt: string;
-  };
-}
-
+/**
+ * Component to display a deck card with its details
+ */
 function DeckCard({ deck }: DeckCardProps) {
   const [likes, setLikes] = useState(deck.likes);
   const [hasLiked, setHasLiked] = useState(false);
 
+  /**
+   * Generates the card image URL based on card name
+   * @param name card name
+   * @returns image URL
+   */
   function getCardImageUrl(name: string): string {
     const slug = name
       .toLowerCase()
@@ -39,6 +25,9 @@ function DeckCard({ deck }: DeckCardProps) {
     return `https://cdn.royaleapi.com/static/img/cards-150/${slug}.png`;
   }
 
+  /**
+   * self explanatory
+   */
   async function handleLike() {
     if (hasLiked) return;
     
@@ -55,6 +44,9 @@ function DeckCard({ deck }: DeckCardProps) {
     }
   }
 
+  /**
+   * self explanatory
+   */
   function getRarityColor(rarity: string): string {
     const colors: Record<string, string> = {
       'LEGENDARY': '#FFD700',

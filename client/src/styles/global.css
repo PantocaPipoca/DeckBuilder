@@ -15,7 +15,6 @@ button {
   font-family: inherit;
 }
 
-/* Scrollbar customizada (Clash Royale style) */
 ::-webkit-scrollbar {
   width: 10px;
 }

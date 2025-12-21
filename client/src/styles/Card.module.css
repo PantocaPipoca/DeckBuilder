@@ -9,13 +9,11 @@
   cursor: pointer;
 }
 
-/* Hover effect */
 .card:hover {
   transform: scale(1.05) translateY(-4px);
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 30px var(--glow-color, #FFD700));
 }
 
-/* Selected state */
 .card.selected {
   /* Glow effect based on rarity */
   filter: drop-shadow(0 0 15px var(--glow-color, #FFD700)) drop-shadow(0 0 30px var(--glow-color, #FFD700)) drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
@@ -27,20 +25,17 @@
   object-fit: cover;
 }
 
-/* Elixir count*/
 .elixirBadge {
   position: absolute;
   top: 10px;
   left: 4px;
   scale: 120%;
   
-  /* Layout */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0;
   
-  /* Visual of text */
   color: white;
   font-weight: bold;
   font-size: 18px;
@@ -65,14 +60,12 @@
   z-index: 2;
 }
 
-/* Cards name */
 .cardName {
   position: absolute;
   bottom: 15%;
   left: 0;
   right: 0;
 
-    /* Visual */
     background: transparent;
     color: #fff;
     font-size: 18px;
@@ -86,18 +79,15 @@
     white-space: pre-line;
     overflow-wrap: break-word;
     word-break: break-word;
-    /* Hidden by default, shown on .selected */
     opacity: 0;
     transition: opacity 0.2s ease;
   transition: opacity 0.2s ease;
 }
 
-/* Show name when card is selected */
 .card.selected .cardName {
   opacity: 1;
 }
 
-/* Button container */
 .buttonContainer {
   display: flex;
   gap: 8px;
@@ -105,7 +95,6 @@
   width: 100%;
 }
 
-/* Base styles for buttons */
 .infoButton,
 .useButton,
 .removeButton {
@@ -164,7 +153,6 @@
   box-shadow: 0 4px 8px rgba(239, 68, 68, 0.4);
 }
 
-/* Buttons when pressed */
 .infoButton:active,
 .useButton:active,
 .removeButton:active {
@@ -172,9 +160,6 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/**
- * (for small screens)
- */
 @media (max-width: 768px) {
   .card {
     max-width: 100px;

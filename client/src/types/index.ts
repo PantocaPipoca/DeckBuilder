@@ -74,13 +74,6 @@ export interface CardSelection {
 
 /**
  * Represents a card in the UI
- * @property card: the card data
- * @property isSelected: if the card is currently selected or no
- * @property onClick: function to call when the card is clicked
- * @property showButtons: whether to show action buttons
- * @property onInfo: function to call when info button is clicked
- * @property onUse: function to call when use button is clicked
- * @property onRemove: function to call when remove button is clicked
  */
 export interface CardProps {
   card: Card;
@@ -104,12 +97,6 @@ export interface DeckBuilderProps {
 
 /**
  * Props for CardCollection component
- * @property cards: array of all available cards
- * @property cardsInDeck: array of cards currently in the deck
- * @property selectedCard: currently selected card or null
- * @property onCardClick: function to call when a card is clicked
- * @property filterState: current state of filters
- * @property onFilterChange: function to call when filters change
  */
 export interface CardCollectionProps {
   cards: Card[];
@@ -128,4 +115,76 @@ export interface CardCollectionProps {
 export interface CardPopupProps {
   card: Card | null;
   onClose: () => void;
+}
+
+/**
+ * Data provided by AuthContext
+ */
+export interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
+
+/**
+ * Props for DeckCard
+ */
+export interface DeckCardProps {
+  deck: {
+    id: number;
+    name: string;
+    description: string;
+    avgElixir: number;
+    likes: number;
+    owner: {
+      id: number;
+      name: string;
+    };
+    cards: Array<{
+      position: number;
+      card: {
+        name: string;
+        elixir: number;
+        rarity: string;
+      };
+    }>;
+    createdAt: string;
+  };
+}
+/**
+ * Public deck structure
+ */
+export interface PublicDeck {
+  id: number;
+  name: string;
+  description: string;
+  avgElixir: number;
+  likes: number;
+  owner: {
+    id: number;
+    name: string;
+  };
+  cards: Array<{
+    position: number;
+    card: {
+      name: string;
+      elixir: number;
+      rarity: string;
+    };
+  }>;
+  createdAt: string;
+}
+/**
+ * Props for ShareDeckPopup
+ */
+export interface ShareDeckPopupProps {
+  deck: Card[];
+  deckId: number | null;
+  deckSlot: number;
+  onClose: () => void;
+  onUpdate: (deck: any) => void;
 }

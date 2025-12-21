@@ -80,7 +80,6 @@ function SocialPage() {
   return (
     <div className={styles.page}>
       <div className={styles.socialContainer}>
-        {/* Title Bar - estilo Clash Royale */}
         <div className={styles.titleBar}>
           <h1 className={styles.title}>Public Decks</h1>
         </div>

@@ -39,7 +39,6 @@
   padding: 8px 4px;
 }
 
-/* Divisor entre botões */
 .navItem:not(:last-child)::after {
   content: '';
   position: absolute;
@@ -89,7 +88,6 @@
   color: rgba(255, 255, 255, 0.95);
 }
 
-/* Active state - CLASH ROYALE STYLE */
 .navItem.active {
   background: linear-gradient(
     180deg,
@@ -148,7 +146,6 @@
   display: none;
 }
 
-/* Mobile adjustments */
 @media (max-width: 768px) {
   .navbar {
     max-width: 100%;

@@ -7,7 +7,6 @@
   align-items: center;
 }
 
-/* Botão de ordem PRIMEIRO (esquerda) */
 .orderButton {
   width: 48px;
   height: 48px;
@@ -42,7 +41,6 @@
     0 4px 8px rgba(74, 123, 181, 0.4);
 }
 
-/* Botão de sort DEPOIS (direita) - AZUL */
 .sortButton {
   padding: 10px 24px;
   background: linear-gradient(135deg, #4a7bb5, #2d5a8c);
