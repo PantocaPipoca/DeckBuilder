@@ -170,6 +170,9 @@ export class DeckService {
    * Updates an existing deck with ownership validation
    */
   static async updateDeck(id: number, data: UpdateDeckDTO, userId: number) {
+      // Remove all likes and reset like count
+      await prisma.deckLike.deleteMany({ where: { deckId: id } });
+      await prisma.deck.update({ where: { id }, data: { likes: 0 } });
     // Verify deck exists and user owns it
     const existingDeck = await this.getDeckById(id, userId);
 
@@ -278,6 +281,10 @@ export class DeckService {
   static async deleteDeck(id: number, userId: number) {
     // Verify deck exists and user owns it
     await this.getDeckById(id, userId);
+
+    // Remove all likes and reset like count
+    await prisma.deckLike.deleteMany({ where: { deckId: id } });
+    await prisma.deck.update({ where: { id }, data: { likes: 0 } });
 
     return prisma.deck.delete({
       where: { id },
